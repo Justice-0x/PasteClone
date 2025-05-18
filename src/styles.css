@@ -361,8 +361,8 @@ main {
 }
 
 textarea#pasteInput {
-  width: 98%;
-  height: 300px;
+  width: 98%; /* Changed from 100% to account for padding/border better within flex item */
+  min-height: 250px; /* Ensure a decent minimum height */
   padding: 10px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
@@ -371,6 +371,7 @@ textarea#pasteInput {
   font-family: 'Courier New', Courier, monospace;
   font-size: 0.95rem;
   margin-bottom: 1rem;
+  box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
 }
 
 .paste-options {
@@ -385,6 +386,7 @@ textarea#pasteInput {
   margin-top: 0;
   color: var(--yankee-white);
   font-size: 1.1rem;
+  margin-bottom: 0.8rem;
 }
 
 .paste-options label {
@@ -424,13 +426,15 @@ button#createNewPasteLinkBtn {
   border-radius: 4px;
   cursor: pointer;
   font-size: 1rem;
-  transition: background-color 0.3s ease;
+  font-weight: bold;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 button#createPasteBtn:hover,
 button#copyLinkBtn:hover,
 button#createNewPasteLinkBtn:hover {
-  background-color: var(--yankee-white); /* Lighter gray on hover */
+  background-color: var(--yankee-white); 
+  color: var(--yankee-navy); /* Ensure text is readable on white background */
 }
 
 .paste-display-area pre#pasteOutput {
@@ -439,8 +443,9 @@ button#createNewPasteLinkBtn:hover {
   padding: 1rem;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  white-space: pre-wrap; /* Handles long lines */
-  word-wrap: break-word; /* Breaks long words */
+  white-space: pre-wrap; 
+  word-wrap: break-word; 
+  min-height: 150px; /* Give it some base height */
   max-height: 400px;
   overflow-y: auto;
   font-family: 'Courier New', Courier, monospace;
@@ -451,23 +456,35 @@ button#createNewPasteLinkBtn:hover {
   word-break: break-all;
 }
 
+.paste-display-area h3 { /* Style for the paste title in display view */
+  color: var(--yankee-white);
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
 .sidebar {
-  flex: 1; /* Takes up 1/4 of the space */
+  flex: 1; 
   background-color: var(--container-background);
   padding: 1.5rem;
   border-radius: 8px;
   border: 1px solid var(--border-color);
+  min-height: 300px; /* Give sidebar some min height */
 }
 
 .sidebar h4 {
   color: var(--yankee-white);
   border-bottom: 1px solid var(--yankee-gray);
   padding-bottom: 0.5rem;
+  margin-top: 0; /* Remove default margin */
 }
 
 .sidebar ul {
   list-style: none;
   padding: 0;
+}
+
+.sidebar ul li {
+  margin-bottom: 0.5rem; /* Add some spacing between recent pastes */
 }
 
 .sidebar ul li a {
@@ -496,7 +513,7 @@ footer {
 
 /* Utility classes */
 .hidden {
-  display: none !important; /* To override previous .hidden if any */
+  display: none !important;
 }
 
 /* Responsive adjustments */
@@ -512,10 +529,19 @@ footer {
 
   header nav {
     margin-top: 0.5rem;
+    width: 100%; /* Make nav take full width */
   }
 
   header nav a {
+    display: block; /* Stack nav links */
     margin-left: 0;
-    margin-right: 1rem;
+    margin-right: 0;
+    margin-bottom: 0.5rem; /* Add space between stacked links */
+    padding: 0.5rem 0; /* Add some padding */
+  }
+
+  .paste-container, .sidebar {
+    width: 100%;
+    box-sizing: border-box; /* Ensure padding doesn't make it overflow */
   }
 }
