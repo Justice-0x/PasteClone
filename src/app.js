@@ -1,105 +1,199 @@
-// Import Prism.js
-import 'prismjs';
-import 'prismjs/themes/prism-tomorrow.css';
+import Prism from 'prismjs';
+// Import specific languages you want to support with Prism
+// Example: import 'prismjs/components/prism-python';
+import 'prismjs/themes/prism-tomorrow.css'; // Or your preferred theme
+
+// DOM Elements
+const pasteInputElement = document.getElementById('pasteInput');
+const syntaxHighlightingElement = document.getElementById('syntaxHighlighting');
+const pasteExpirationElement = document.getElementById('pasteExpiration');
+const pasteExposureElement = document.getElementById('pasteExposure');
+const pasteFolderElement = document.getElementById('pasteFolder');
+const pastePasswordElement = document.getElementById('pastePassword');
+const burnAfterReadElement = document.getElementById('burnAfterRead');
+const pasteTitleElement = document.getElementById('pasteTitle');
+const createPasteBtnElement = document.getElementById('createPasteBtn');
+
+const pasteInputAreaElement = document.querySelector('.paste-input-area');
+const pasteDisplayAreaElement = document.querySelector('.paste-display-area');
+
+const displayTitleElement = document.getElementById('displayTitle');
+const pasteOutputElement = document.getElementById('pasteOutput');
+const shareLinkElement = document.getElementById('shareLink');
+const copyLinkBtnElement = document.getElementById('copyLinkBtn');
+const createNewPasteLinkBtnElement = document.getElementById('createNewPasteLinkBtn');
+const recentPastesListElement = document.getElementById('recentPastesList');
 
 // Generate a random ID for pastes
 function generatePasteId() {
-  return Math.random().toString(36).substring(2, 10);
+    return Math.random().toString(36).substring(2, 10);
 }
 
 // Copy text to clipboard
-function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    const copyBtn = document.getElementById('copyButton');
-    const originalText = copyBtn.textContent;
-    
-    copyBtn.textContent = 'Copied!';
-    copyBtn.style.backgroundColor = '#218838';
-    
-    setTimeout(() => {
-      copyBtn.textContent = originalText;
-      copyBtn.style.backgroundColor = '#28a745';
-    }, 2000);
-  }).catch(err => {
-    console.error('Failed to copy: ', err);
-    alert('Failed to copy to clipboard');
-  });
+function copyToClipboard(text, buttonElement) {
+    navigator.clipboard.writeText(text).then(() => {
+        const originalText = buttonElement.textContent;
+        buttonElement.textContent = 'Copied!';
+        // Optional: Change button style on copy
+        setTimeout(() => {
+            buttonElement.textContent = originalText;
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+        alert('Failed to copy to clipboard');
+    });
 }
 
-document.getElementById('pasteForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
+function showPasteInputArea() {
+    pasteInputAreaElement.style.display = 'block';
+    pasteDisplayAreaElement.style.display = 'none';
+    if (pasteInputElement) pasteInputElement.value = '';
+    if (pasteTitleElement) pasteTitleElement.value = '';
+    // Reset other options to default if needed
+    if (pasteExpirationElement) pasteExpirationElement.value = '1d';
+    if (syntaxHighlightingElement) syntaxHighlightingElement.value = 'none';
+    if (pasteExposureElement) pasteExposureElement.value = 'public';
+    if (pastePasswordElement) pastePasswordElement.value = '';
+    if (burnAfterReadElement) burnAfterReadElement.checked = false;
 
-  const content = document.getElementById('pasteContent').value;
-  if (!content.trim()) {
-    alert('Please enter some text or code.');
-    return;
-  }
+    window.history.pushState({}, '', window.location.pathname); // Clear URL params
+}
 
-  try {
-    // Generate a unique ID for the paste
-    const pasteId = generatePasteId();
+function showPasteDisplayArea(pasteData) {
+    pasteInputAreaElement.style.display = 'none';
+    pasteDisplayAreaElement.style.display = 'block';
+
+    displayTitleElement.textContent = pasteData.title || 'Untitled Paste';
+    pasteOutputElement.textContent = pasteData.content;
     
-    // Store the paste in localStorage (for demo purposes)
-    localStorage.setItem(`paste_${pasteId}`, content);
+    // Apply Syntax Highlighting
+    const language = pasteData.syntax || 'none';
+    pasteOutputElement.className = 'language-' + language; // Set class for Prism
+    Prism.highlightElement(pasteOutputElement);
 
-    // Construct the paste URL
-    const pasteUrl = `${window.location.origin}?paste=${pasteId}`;
+    const pasteUrl = `${window.location.origin}${window.location.pathname}?paste=${pasteData.id}`;
+    shareLinkElement.href = pasteUrl;
+    shareLinkElement.textContent = pasteUrl;
+}
 
-    // Display the result with animation
-    document.getElementById('pasteLink').href = pasteUrl;
-    document.getElementById('pasteLink').textContent = pasteUrl;
-    document.getElementById('result').classList.remove('hidden');
-    
-    // Setup copy button
-    document.getElementById('copyButton').addEventListener('click', () => {
-      copyToClipboard(pasteUrl);
+function loadRecentPastes() {
+    if (!recentPastesListElement) return;
+    recentPastesListElement.innerHTML = ''; // Clear existing
+    const keys = Object.keys(localStorage);
+    const pasteKeys = keys.filter(key => key.startsWith('paste_')).reverse().slice(0, 5); // Get last 5
+
+    pasteKeys.forEach(key => {
+        try {
+            const pasteData = JSON.parse(localStorage.getItem(key));
+            if (pasteData && pasteData.id && pasteData.title) {
+                const listItem = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = `${window.location.pathname}?paste=${pasteData.id}`;
+                link.textContent = pasteData.title || 'Untitled Paste';
+                listItem.appendChild(link);
+                recentPastesListElement.appendChild(listItem);
+            }
+        } catch (e) {
+            console.error("Error parsing recent paste from localStorage", e);
+        }
     });
+}
 
-    // Scroll to the result
-    document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+// Event Listeners
+if (createPasteBtnElement) {
+    createPasteBtnElement.addEventListener('click', async () => {
+        const content = pasteInputElement.value;
+        if (!content.trim()) {
+            alert('Please enter some text to paste.');
+            return;
+        }
 
-    // Show a preview with syntax highlighting
-    document.getElementById('highlightedCode').textContent = content;
-    Prism.highlightElement(document.getElementById('highlightedCode')); // Apply syntax highlighting
-    document.getElementById('preview').classList.remove('hidden');
-  } catch (error) {
-    alert(`Error: ${error.message}`);
-  }
-});
+        const pasteId = generatePasteId();
+        const pasteData = {
+            id: pasteId,
+            content: content,
+            title: pasteTitleElement.value || 'Untitled',
+            expiration: pasteExpirationElement.value,
+            syntax: syntaxHighlightingElement.value,
+            exposure: pasteExposureElement.value,
+            folder: pasteFolderElement.value,
+            // password: pastePasswordElement.value, // Implement secure handling for passwords
+            // burnAfterRead: burnAfterReadElement.checked,
+            timestamp: new Date().toISOString()
+        };
 
-// Check if there's a paste ID in the URL when the page loads
-window.addEventListener('DOMContentLoaded', () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const pasteId = urlParams.get('paste');
-  
-  if (pasteId) {
-    // We're in viewing mode
-    // Hide the form and show the "create new paste" button
-    document.getElementById('pasteForm').classList.add('hidden');
-    document.getElementById('createNewContainer').classList.remove('hidden');
-    document.getElementById('pageTitle').textContent = 'Viewing Paste';
-    document.body.classList.add('view-mode');
-    
-    // Retrieve the paste content from localStorage
-    const content = localStorage.getItem(`paste_${pasteId}`);
-    
-    if (content) {
-      // Show the preview immediately as the main content
-      document.getElementById('highlightedCode').textContent = content;
-      Prism.highlightElement(document.getElementById('highlightedCode'));
-      document.getElementById('preview').classList.remove('hidden');
-      document.getElementById('previewTitle').textContent = 'Paste Content';
-      
-      // Show the "paste viewed" message
-      document.getElementById('viewResult').classList.remove('hidden');
-      
-      // Setup copy content button
-      document.getElementById('copyContentButton').addEventListener('click', () => {
-        copyToClipboard(content);
-      });
+        try {
+            localStorage.setItem(`paste_${pasteId}`, JSON.stringify(pasteData));
+            showPasteDisplayArea(pasteData);
+            loadRecentPastes(); // Refresh recent pastes list
+            // Update URL to reflect the paste ID without causing a page reload
+            window.history.pushState(pasteData, pasteData.title || 'Yankee Paste', `${window.location.pathname}?paste=${pasteId}`);
+        } catch (error) {
+            console.error('Error saving paste:', error);
+            alert('Error saving paste. LocalStorage might be full or unavailable.');
+        }
+    });
+}
+
+if (copyLinkBtnElement) {
+    copyLinkBtnElement.addEventListener('click', () => {
+        if (shareLinkElement.href && shareLinkElement.href !== '#') {
+            copyToClipboard(shareLinkElement.href, copyLinkBtnElement);
+        } else {
+            alert('No link to copy!');
+        }
+    });
+}
+
+if (createNewPasteLinkBtnElement) {
+    createNewPasteLinkBtnElement.addEventListener('click', () => {
+        showPasteInputArea();
+        loadRecentPastes();
+    });
+}
+
+// Handle direct URL access to a paste and back/forward navigation
+function handleUrlOrNavigation() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const pasteId = urlParams.get('paste');
+
+    if (pasteId) {
+        const pasteDataString = localStorage.getItem(`paste_${pasteId}`);
+        if (pasteDataString) {
+            try {
+                const pasteData = JSON.parse(pasteDataString);
+                showPasteDisplayArea(pasteData);
+            } catch (e) {
+                console.error("Error parsing paste data from localStorage", e);
+                alert("Could not load paste. Data might be corrupted.");
+                showPasteInputArea();
+            }
+        } else {
+            alert('Paste not found or expired.');
+            showPasteInputArea(); // Show input area if paste not found
+        }
     } else {
-      // Handle case where paste doesn't exist
-      document.getElementById('notFoundMessage').classList.remove('hidden');
+        showPasteInputArea();
     }
-  }
+    loadRecentPastes();
+}
+
+// Listen for popstate events (back/forward browser buttons)
+window.addEventListener('popstate', (event) => {
+    handleUrlOrNavigation();
 });
+
+// Initial page load
+document.addEventListener('DOMContentLoaded', () => {
+    handleUrlOrNavigation();
+});
+
+// Also update the header link to act like "create new paste"
+const headerNewPasteLink = document.querySelector('header nav a');
+if(headerNewPasteLink && headerNewPasteLink.textContent.includes("Create New Paste")) {
+    headerNewPasteLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        showPasteInputArea();
+        loadRecentPastes();
+    });
+}

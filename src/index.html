@@ -25,6 +25,27 @@
         
         <div class="paste-options">
           <h3>Paste Settings</h3>
+
+          <label for="syntaxHighlighting">Syntax Highlighting:</label>
+          <select id="syntaxHighlighting">
+            <option value="none" selected>None</option>
+            <option value="text">Plain Text</option>
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="csharp">C#</option>
+            <option value="php">PHP</option>
+            <option value="cpp">C++</option>
+            <option value="ruby">Ruby</option>
+            <option value="go">Go</option>
+            <option value="html">HTML</option>
+            <option value="css">CSS</option>
+            <option value="xml">XML</option>
+            <option value="sql">SQL</option>
+            <option value="bash">Bash/Shell</option>
+            <!-- Add more common languages as needed -->
+          </select>
+
           <label for="pasteExpiration">Expiration:</label>
           <select id="pasteExpiration">
             <option value="10m">10 Minutes</option>
@@ -38,6 +59,27 @@
             <option value="never">Never</option>
           </select>
           <p class="expiration-note">Default: Paste will expire in 24 hours unless another option is selected.</p>
+
+          <label for="pasteExposure">Paste Exposure:</label>
+          <select id="pasteExposure">
+            <option value="public" selected>Public</option>
+            <option value="unlisted">Unlisted</option>
+            <option value="private">Private (requires login - future feature)</option>
+          </select>
+
+          <label for="pasteFolder">Folder:</label>
+          <select id="pasteFolder">
+            <option value="none" selected>None</option>
+            <!-- Folder options would be dynamically populated if user is logged in -->
+          </select>
+
+          <label for="pastePassword">Password (Optional):</label>
+          <input type="password" id="pastePassword" placeholder="Protect with a password">
+
+          <div>
+            <input type="checkbox" id="burnAfterRead" name="burnAfterRead">
+            <label for="burnAfterRead" class="inline-label">Burn after read (Future feature)</label>
+          </div>
 
           <label for="pasteTitle">Optional Paste Title:</label>
           <input type="text" id="pasteTitle" placeholder="Enter a title (optional)">

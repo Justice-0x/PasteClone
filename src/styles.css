@@ -397,7 +397,8 @@ textarea#pasteInput {
 }
 
 .paste-options select,
-.paste-options input[type="text"] {
+.paste-options input[type="text"],
+.paste-options input[type="password"] {
   width: 100%;
   padding: 8px;
   margin-bottom: 0.8rem;
@@ -406,6 +407,18 @@ textarea#pasteInput {
   background-color: var(--input-bg);
   color: var(--input-text);
   box-sizing: border-box;
+}
+
+.paste-options div {
+  margin-bottom: 0.8rem; /* Add spacing for the checkbox div */
+}
+
+.paste-options .inline-label {
+  display: inline; /* Make label sit next to checkbox */
+  margin-left: 0.3rem;
+  font-weight: normal; /* Override general label boldness if any */
+  color: var(--yankee-gray); /* Match other label text color */
+  font-size: 0.9rem;
 }
 
 .expiration-note,
