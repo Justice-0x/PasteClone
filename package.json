@@ -54,7 +54,6 @@
     "weak-lru-cache": "^1.2.2"
   },
   "devDependencies": {
-    "parcel": "^2.9.3",
     "prismjs": "^1.30.0"
   },
   "scripts": {
