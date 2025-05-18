@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Snippet Sharing</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1 id="pageTitle">Create a New Paste</h1>
+    
+    <!-- Form for creating a new paste -->
+    <form id="pasteForm">
+      <textarea id="pasteContent" placeholder="Enter your text or code here..."></textarea>
+      <button type="submit">Create Paste</button>
+    </form>
+    
+    <!-- Result after creating a paste -->
+    <div id="result" class="hidden">
+      <div class="success-icon">🎉</div>
+      <h2>BAM! Your paste is ready!</h2>
+      <p>Share this awesome link with anyone:</p>
+      <div class="link-container">
+        <a id="pasteLink" href="#" target="_blank"></a>
+        <button id="copyButton" class="copy-btn">Copy Link</button>
+      </div>
+    </div>
+    
+    <!-- Container for the "Create New Paste" button -->
+    <div id="createNewContainer" class="hidden">
+      <a href="/" class="new-paste-btn">Create New Paste</a>
+    </div>
+    
+    <!-- Message when viewing a paste -->
+    <div id="viewResult" class="hidden view-result">
+      <div class="view-icon">📋</div>
+      <h2>You're viewing a shared paste</h2>
+      <div class="action-buttons">
+        <button id="copyContentButton" class="copy-content-btn">Copy All Content</button>
+      </div>
+    </div>
+    
+    <!-- Message when paste is not found -->
+    <div id="notFoundMessage" class="hidden not-found">
+      <div class="error-icon">❌</div>
+      <h2>Paste Not Found</h2>
+      <p>The paste you're looking for doesn't exist or has expired.</p>
+    </div>
+    
+    <!-- Preview Area for Syntax Highlighting -->
+    <div id="preview" class="hidden">
+      <h2 id="previewTitle">Paste Preview</h2>
+      <pre><code id="highlightedCode" class="language-javascript"></code></pre>
+    </div>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+
+</html>
