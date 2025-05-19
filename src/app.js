@@ -1,4 +1,6 @@
 import Prism from 'prismjs';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 // Import specific languages you want to support with Prism
 // Example: import 'prismjs/components/prism-python';
 import 'prismjs/themes/prism-tomorrow.css'; // Or your preferred theme
@@ -64,12 +66,41 @@ function showPasteDisplayArea(pasteData) {
     pasteDisplayAreaElement.style.display = 'block';
 
     displayTitleElement.textContent = pasteData.title || 'Untitled Paste';
-    pasteOutputElement.textContent = pasteData.content;
     
-    // Apply Syntax Highlighting
+    // Clear previous content and classes from pasteOutputElement
+    pasteOutputElement.innerHTML = '';
+    pasteOutputElement.className = ''; // Clear all previous classes
+
     const language = pasteData.syntax || 'none';
-    pasteOutputElement.className = 'language-' + language; // Set class for Prism
-    Prism.highlightElement(pasteOutputElement);
+
+    if (language === 'markdown') {
+        const rawHtml = marked.parse(pasteData.content || '');
+        const sanitizedHtml = DOMPurify.sanitize(rawHtml);
+        pasteOutputElement.innerHTML = sanitizedHtml;
+        // Apply Prism highlighting to any code blocks within the Markdown
+        pasteOutputElement.querySelectorAll('pre code').forEach((block) => {
+            Prism.highlightElement(block);
+        });
+    } else {
+        // For non-markdown, create pre and code elements for Prism
+        const preElement = document.createElement('pre');
+        const codeElement = document.createElement('code');
+        
+        codeElement.textContent = pasteData.content || '';
+        if (language !== 'none' && language !== 'text') {
+            codeElement.className = 'language-' + language;
+        }
+        
+        preElement.appendChild(codeElement);
+        pasteOutputElement.appendChild(preElement);
+
+        if (language !== 'none' && language !== 'text') {
+            Prism.highlightElement(codeElement);
+        } else {
+            // For plain text or 'none', no syntax highlighting, but ensure it's wrapped for consistent styling
+            preElement.className = 'language-text'; // Or a generic class
+        }
+    }
 
     const pasteUrl = `${window.location.origin}${window.location.pathname}?paste=${pasteData.id}`;
     shareLinkElement.href = pasteUrl;
