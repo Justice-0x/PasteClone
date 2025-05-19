@@ -31,7 +31,7 @@ const themeSelectorElement = document.getElementById('themeSelector');
 const matrixCanvasElement = document.getElementById('matrixCanvas');
 const downloadPasteBtnElement = document.getElementById('downloadPasteBtn');
 
-const GNEWS_API_KEY = 'af40488155eaf6efee4246d45bc58de4'; // USER PROVIDED API KEY
+const GNEWS_API_KEY = process.env.GNEWS_API_KEY; // USER PROVIDED API KEY
 
 let currentPasteData = null; // To store the currently displayed paste data for download
 
