@@ -26,8 +26,32 @@ const copyLinkBtnElement = document.getElementById('copyLinkBtn');
 const createNewPasteLinkBtnElement = document.getElementById('createNewPasteLinkBtn');
 const recentPastesListElement = document.getElementById('recentPastesList');
 const aiNewsContainerElement = document.getElementById('aiNewsContainer');
+const themeSelectorElement = document.getElementById('themeSelector');
 
-const GNEWS_API_KEY = 'af40488155eaf6efee4246d45bc58de4'; // <<< REPLACE WITH YOUR ACTUAL API KEY
+const GNEWS_API_KEY = 'af40488155eaf6efee4246d45bc58de4'; // USER PROVIDED API KEY
+
+// Theme handling
+function applyTheme(themeName) {
+    document.body.classList.remove('theme-dark', 'theme-spooky');
+    if (themeName) {
+        document.body.classList.add(`theme-${themeName}`);
+    }
+    localStorage.setItem('theme', themeName);
+    if (themeSelectorElement) {
+        themeSelectorElement.value = themeName;
+    }
+}
+
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to dark
+    applyTheme(savedTheme);
+}
+
+if (themeSelectorElement) {
+    themeSelectorElement.addEventListener('change', (event) => {
+        applyTheme(event.target.value);
+    });
+}
 
 // Generate a random ID for pastes
 function generatePasteId() {
@@ -271,6 +295,7 @@ window.addEventListener('popstate', (event) => {
 
 // Initial page load
 document.addEventListener('DOMContentLoaded', () => {
+    loadTheme(); // Load theme first
     handleUrlOrNavigation();
     fetchAINews(GNEWS_API_KEY);
     setInterval(() => fetchAINews(GNEWS_API_KEY), 3600000); // Refresh every hour

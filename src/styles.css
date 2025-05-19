@@ -1,27 +1,52 @@
 /* styles.css */
 :root {
-  --yankee-navy: #0C2340;
-  --yankee-gray: #C4CED3;
-  --yankee-white: #FFFFFF;
-  --yankee-light-gray: #F0F0F0; /* For backgrounds or subtle elements */
-  --text-color: var(--yankee-white);
-  --background-color: var(--yankee-navy);
-  --container-background: #1E2D3B; /* A slightly lighter navy for containers */
-  --border-color: var(--yankee-gray);
-  --button-bg: var(--yankee-gray);
-  --button-text: var(--yankee-navy);
-  --input-bg: var(--yankee-light-gray);
-  --input-text: var(--yankee-navy);
-  --link-color: #6CB6FF; /* A lighter blue for links, good contrast on navy */
+  /* Default Dark Theme Variables (current Yankee theme) */
+  --theme-bg: #0C2340; /* yankee-navy */
+  --theme-text: #FFFFFF; /* yankee-white */
+  --theme-container-bg: #1E2D3B;
+  --theme-border: #C4CED3; /* yankee-gray */
+  --theme-button-bg: #C4CED3;
+  --theme-button-text: #0C2340;
+  --theme-input-bg: #F0F0F0; /* yankee-light-gray */
+  --theme-input-text: #0C2340;
+  --theme-link: #6CB6FF;
+  --theme-sidebar-text: #C4CED3; /* For .sidebar p and .ai-news-item p */
+}
+
+body.theme-dark {
+  --theme-bg: #0C2340;
+  --theme-text: #FFFFFF;
+  --theme-container-bg: #1E2D3B;
+  --theme-border: #C4CED3;
+  --theme-button-bg: #C4CED3;
+  --theme-button-text: #0C2340;
+  --theme-input-bg: #F0F0F0;
+  --theme-input-text: #0C2340;
+  --theme-link: #6CB6FF;
+  --theme-sidebar-text: #C4CED3;
+}
+
+body.theme-spooky {
+  --theme-bg: #1A1A1A;       /* Very dark gray/black */
+  --theme-text: #E0E0E0;     /* Light gray */
+  --theme-container-bg: #2C2C2C; /* Darker container */
+  --theme-border: #5D3FD3;   /* Purple for borders */
+  --theme-button-bg: #FF6600; /* Orange for buttons */
+  --theme-button-text: #1A1A1A;/* Black text on orange buttons */
+  --theme-input-bg: #333333;  /* Dark input bg */
+  --theme-input-text: #E0E0E0;/* Light gray input text */
+  --theme-link: #FF8C00;     /* Dark Orange for links */
+  --theme-sidebar-text: #AAAAAA; /* Medium gray for sidebar text */
 }
 
 body {
   font-family: 'Arial', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: var(--background-color);
-  color: var(--text-color);
+  background-color: var(--theme-bg);
+  color: var(--theme-text);
   line-height: 1.6;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 /* Apply a different background in viewing mode */
@@ -312,9 +337,9 @@ body.view-mode #preview {
 }
 
 header {
-  background-color: var(--container-background);
+  background-color: var(--theme-container-bg);
   padding: 1rem 2rem;
-  border-bottom: 2px solid var(--yankee-gray);
+  border-bottom: 2px solid var(--theme-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -322,12 +347,12 @@ header {
 
 header h1 {
   margin: 0;
-  color: var(--yankee-white);
+  color: var(--theme-text);
   font-size: 1.8rem;
 }
 
 header nav a {
-  color: var(--link-color);
+  color: var(--theme-link);
   text-decoration: none;
   margin-left: 1rem;
   font-size: 1rem;
@@ -345,17 +370,17 @@ main {
 
 .paste-container {
   flex: 3; /* Takes up 3/4 of the space */
-  background-color: var(--container-background);
+  background-color: var(--theme-container-bg);
   padding: 1.5rem;
   border-radius: 8px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--theme-border);
 }
 
 .paste-input-area h2,
 .paste-display-area h2 {
   margin-top: 0;
-  color: var(--yankee-white);
-  border-bottom: 1px solid var(--yankee-gray);
+  color: var(--theme-text);
+  border-bottom: 1px solid var(--theme-border);
   padding-bottom: 0.5rem;
   margin-bottom: 1rem;
 }
@@ -364,10 +389,10 @@ textarea#pasteInput {
   width: 98%; /* Changed from 100% to account for padding/border better within flex item */
   min-height: 250px; /* Ensure a decent minimum height */
   padding: 10px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--theme-border);
   border-radius: 4px;
-  background-color: var(--input-bg);
-  color: var(--input-text);
+  background-color: var(--theme-input-bg);
+  color: var(--theme-input-text);
   font-family: 'Courier New', Courier, monospace;
   font-size: 0.95rem;
   margin-bottom: 1rem;
@@ -375,16 +400,16 @@ textarea#pasteInput {
 }
 
 .paste-options {
-  background-color: var(--yankee-navy); /* Darker section for options */
+  background-color: var(--theme-bg); /* Use main bg for options contrast */
   padding: 1rem;
   border-radius: 4px;
   margin-bottom: 1rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--theme-border);
 }
 
 .paste-options h3 {
   margin-top: 0;
-  color: var(--yankee-white);
+  color: var(--theme-text);
   font-size: 1.1rem;
   margin-bottom: 0.8rem;
 }
@@ -392,7 +417,7 @@ textarea#pasteInput {
 .paste-options label {
   display: block;
   margin-bottom: 0.3rem;
-  color: var(--yankee-gray);
+  color: var(--theme-sidebar-text); /* Using sidebar-text as it's generally lighter */
   font-size: 0.9rem;
 }
 
@@ -402,10 +427,10 @@ textarea#pasteInput {
   width: 100%;
   padding: 8px;
   margin-bottom: 0.8rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--theme-border);
   border-radius: 4px;
-  background-color: var(--input-bg);
-  color: var(--input-text);
+  background-color: var(--theme-input-bg);
+  color: var(--theme-input-text);
   box-sizing: border-box;
 }
 
@@ -417,14 +442,14 @@ textarea#pasteInput {
   display: inline; /* Make label sit next to checkbox */
   margin-left: 0.3rem;
   font-weight: normal; /* Override general label boldness if any */
-  color: var(--yankee-gray); /* Match other label text color */
+  color: var(--theme-sidebar-text);
   font-size: 0.9rem;
 }
 
 .expiration-note,
 .expiration-info-sidebar {
   font-size: 0.85rem;
-  color: var(--yankee-gray);
+  color: var(--theme-sidebar-text);
   margin-top: -0.5rem;
   margin-bottom: 1rem;
 }
@@ -432,8 +457,8 @@ textarea#pasteInput {
 button#createPasteBtn,
 button#copyLinkBtn,
 button#createNewPasteLinkBtn {
-  background-color: var(--button-bg);
-  color: var(--button-text);
+  background-color: var(--theme-button-bg);
+  color: var(--theme-button-text);
   padding: 10px 15px;
   border: none;
   border-radius: 4px;
@@ -446,15 +471,15 @@ button#createNewPasteLinkBtn {
 button#createPasteBtn:hover,
 button#copyLinkBtn:hover,
 button#createNewPasteLinkBtn:hover {
-  background-color: var(--yankee-white); 
-  color: var(--yankee-navy); /* Ensure text is readable on white background */
+  background-color: var(--theme-text); /* Example: Invert for hover - might need adjustment */
+  color: var(--theme-bg);
 }
 
 .paste-display-area pre#pasteOutput {
-  background-color: var(--input-bg);
-  color: var(--input-text);
+  background-color: var(--theme-input-bg);
+  color: var(--theme-input-text);
   padding: 1rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--theme-border);
   border-radius: 4px;
   white-space: pre-wrap; 
   word-wrap: break-word; 
@@ -465,28 +490,28 @@ button#createNewPasteLinkBtn:hover {
 }
 
 .paste-display-area #shareLink {
-  color: var(--link-color);
+  color: var(--theme-link);
   word-break: break-all;
 }
 
 .paste-display-area h3 { /* Style for the paste title in display view */
-  color: var(--yankee-white);
+  color: var(--theme-text);
   margin-top: 0;
   margin-bottom: 0.5rem;
 }
 
 .sidebar {
   flex: 1; 
-  background-color: var(--container-background);
+  background-color: var(--theme-container-bg);
   padding: 1.5rem;
   border-radius: 8px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--theme-border);
   min-height: 300px; /* Give sidebar some min height */
 }
 
 .sidebar h4 {
-  color: var(--yankee-white);
-  border-bottom: 1px solid var(--yankee-gray);
+  color: var(--theme-text);
+  border-bottom: 1px solid var(--theme-border);
   padding-bottom: 0.5rem;
   margin-top: 0; /* Remove default margin */
 }
@@ -501,7 +526,7 @@ button#createNewPasteLinkBtn:hover {
 }
 
 .sidebar ul li a {
-  color: var(--link-color);
+  color: var(--theme-link);
   text-decoration: none;
 }
 
@@ -512,15 +537,16 @@ button#createNewPasteLinkBtn:hover {
 .sidebar p {
   margin-bottom: 10px;
   font-size: 0.9em;
+  color: var(--theme-sidebar-text);
 }
 
 footer {
   text-align: center;
   padding: 1rem;
   margin-top: 1rem;
-  background-color: var(--container-background);
-  border-top: 2px solid var(--yankee-gray);
-  color: var(--yankee-gray);
+  background-color: var(--theme-container-bg);
+  border-top: 2px solid var(--theme-border);
+  color: var(--theme-sidebar-text);
   font-size: 0.9rem;
 }
 
@@ -563,7 +589,7 @@ footer {
 #aiNewsContainer {
   margin-top: 15px;
   padding-top: 10px;
-  border-top: 1px solid var(--yankee-gray);
+  border-top: 1px solid var(--theme-border);
 }
 
 .ai-news-item {
@@ -576,7 +602,7 @@ footer {
 }
 
 .ai-news-item h5 a {
-  color: var(--link-color);
+  color: var(--theme-link);
   text-decoration: none;
 }
 
@@ -587,5 +613,5 @@ footer {
 .ai-news-item p {
   font-size: 0.85em;
   margin: 0;
-  color: var(--yankee-gray); /* Lighter text for description */
+  color: var(--theme-sidebar-text);
 }
