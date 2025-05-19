@@ -19,8 +19,8 @@ export default async function handler(req, res) {
         try {
             const { username, email, password } = req.body;
 
-            if (!username || !password) {
-                return sendResponse(res, 400, { message: 'Username and password are required.' });
+            if (!username || !password || !email) {
+                return sendResponse(res, 400, { message: 'Username, email, and password are required.' });
             }
             if (password.length < 6) {
                 return sendResponse(res, 400, { message: 'Password must be at least 6 characters long.' });

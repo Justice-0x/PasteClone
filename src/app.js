@@ -563,9 +563,18 @@ function displayAuthMessage(element, message, isSuccess) {
 async function handleRegisterSubmit(event) {
     event.preventDefault();
     const username = registerFormElement.username.value;
-    const email = registerFormElement.email.value; // Optional
+    const email = registerFormElement.email.value;
     const password = registerFormElement.password.value;
     registerMessageElement.style.display = 'none'; // Clear previous messages
+
+    if (!username || !password || !email) {
+        displayAuthMessage(registerMessageElement, 'Username, email, and password are required.', false);
+        return;
+    }
+    if (password.length < 6) {
+        displayAuthMessage(registerMessageElement, 'Password must be at least 6 characters long.', false);
+        return;
+    }
 
     try {
         const response = await fetch('/api/register', {
