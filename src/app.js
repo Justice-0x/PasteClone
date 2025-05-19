@@ -31,9 +31,28 @@ const themeSelectorElement = document.getElementById('themeSelector');
 const matrixCanvasElement = document.getElementById('matrixCanvas');
 const downloadPasteBtnElement = document.getElementById('downloadPasteBtn');
 
+// Auth DOM Elements
+const navLoginElement = document.getElementById('navLogin');
+const navRegisterElement = document.getElementById('navRegister');
+const navLogoutElement = document.getElementById('navLogout');
+const userStatusElement = document.getElementById('userStatus');
+const navDropNewPasteElement = document.getElementById('navDropNewPaste'); // Assuming the main paste link needs to be handled
+
+const authFormsContainerElement = document.getElementById('authFormsContainer');
+const registerFormContainerElement = document.getElementById('registerFormContainer');
+const loginFormContainerElement = document.getElementById('loginFormContainer');
+const registerFormElement = document.getElementById('registerForm');
+const loginFormElement = document.getElementById('loginForm');
+const registerMessageElement = document.getElementById('registerMessage');
+const loginMessageElement = document.getElementById('loginMessage');
+const switchToLoginLink = document.getElementById('switchToLogin');
+const switchToRegisterLink = document.getElementById('switchToRegister');
+
 const GNEWS_API_KEY = process.env.GNEWS_API_KEY; // USER PROVIDED API KEY
 
 let currentPasteData = null; // To store the currently displayed paste data for download
+let currentUser = null; // To store logged-in user data { id, username, role }
+let authToken = null; // To store JWT
 
 // Matrix Effect Variables
 let matrixCtx;
@@ -151,71 +170,109 @@ function copyToClipboard(text, buttonElement) {
     });
 }
 
-function showPasteInputArea() {
-    pasteInputAreaElement.style.display = 'block';
+// Function to parse JWT and get payload
+function parseJwt(token) {
+    try {
+        return JSON.parse(atob(token.split('.')[1]));
+    } catch (e) {
+        return null;
+    }
+}
+
+// Function to update UI based on login status
+function updateUserNavUI() {
+    if (authToken && currentUser) {
+        navLoginElement.style.display = 'none';
+        navRegisterElement.style.display = 'none';
+        userStatusElement.textContent = `Yo, ${currentUser.username}!`;
+        userStatusElement.style.display = 'inline';
+        navLogoutElement.style.display = 'inline';
+        // Potentially enable/disable other features based on login
+    } else {
+        navLoginElement.style.display = 'inline';
+        navRegisterElement.style.display = 'inline';
+        userStatusElement.style.display = 'none';
+        userStatusElement.textContent = '';
+        navLogoutElement.style.display = 'none';
+    }
+}
+
+// Function to control visibility of main content areas
+function showView(viewName) {
+    // Hide all main views first
+    pasteInputAreaElement.style.display = 'none';
     pasteDisplayAreaElement.style.display = 'none';
+    authFormsContainerElement.style.display = 'none';
+    registerFormContainerElement.style.display = 'none';
+    loginFormContainerElement.style.display = 'none';
+    stopMatrix(); // Stop matrix if it's running
+
+    if (viewName === 'pasteInput') {
+        pasteInputAreaElement.style.display = 'block';
+        startMatrix(); // Start matrix for paste input view
+    } else if (viewName === 'pasteDisplay') {
+        pasteDisplayAreaElement.style.display = 'block';
+    } else if (viewName === 'login') {
+        authFormsContainerElement.style.display = 'block';
+        loginFormContainerElement.style.display = 'block';
+    } else if (viewName === 'register') {
+        authFormsContainerElement.style.display = 'block';
+        registerFormContainerElement.style.display = 'block';
+    }
+    // Clear URL params if not viewing a specific paste
+    if (viewName !== 'pasteDisplay' && !window.location.search.includes('paste=')) {
+        window.history.pushState({}, '', window.location.pathname);
+    }
+}
+
+// Overwrite existing showPasteInputArea and showPasteDisplayArea to use showView
+function showPasteInputArea() {
+    showView('pasteInput');
     if (pasteInputElement) pasteInputElement.value = '';
     if (pasteTitleElement) pasteTitleElement.value = '';
-    // Reset other options to default if needed
     if (pasteExpirationElement) pasteExpirationElement.value = '1d';
     if (syntaxHighlightingElement) syntaxHighlightingElement.value = 'none';
     if (pasteExposureElement) pasteExposureElement.value = 'public';
     if (pastePasswordElement) pastePasswordElement.value = '';
     if (burnAfterReadElement) burnAfterReadElement.checked = false;
-    currentPasteData = null; // Clear current paste data when going to input area
-
-    window.history.pushState({}, '', window.location.pathname); // Clear URL params
-    startMatrix();
+    currentPasteData = null;
 }
 
 function showPasteDisplayArea(pasteData) {
-    pasteInputAreaElement.style.display = 'none';
-    pasteDisplayAreaElement.style.display = 'block';
-    stopMatrix();
-
-    currentPasteData = pasteData; // Store for download functionality
+    showView('pasteDisplay');
+    currentPasteData = pasteData;
 
     displayTitleElement.textContent = pasteData.title || 'MyGuy\'s Fresh Drop';
-    
-    // Clear previous content and classes from pasteOutputElement
     pasteOutputElement.innerHTML = '';
-    pasteOutputElement.className = ''; // Clear all previous classes
+    pasteOutputElement.className = '';
 
     const language = pasteData.syntax || 'none';
-
     if (language === 'markdown') {
         const rawHtml = marked.parse(pasteData.content || '');
         const sanitizedHtml = DOMPurify.sanitize(rawHtml);
         pasteOutputElement.innerHTML = sanitizedHtml;
-        // Apply Prism highlighting to any code blocks within the Markdown
         pasteOutputElement.querySelectorAll('pre code').forEach((block) => {
             Prism.highlightElement(block);
         });
     } else {
-        // For non-markdown, create pre and code elements for Prism
         const preElement = document.createElement('pre');
         const codeElement = document.createElement('code');
-        
         codeElement.textContent = pasteData.content || '';
         if (language !== 'none' && language !== 'text') {
             codeElement.className = 'language-' + language;
         }
-        
         preElement.appendChild(codeElement);
         pasteOutputElement.appendChild(preElement);
-
         if (language !== 'none' && language !== 'text') {
             Prism.highlightElement(codeElement);
         } else {
-            // For plain text or 'none', no syntax highlighting, but ensure it's wrapped for consistent styling
-            preElement.className = 'language-text'; // Or a generic class
+            preElement.className = 'language-text';
         }
     }
 
     const pasteUrl = `${window.location.origin}${window.location.pathname}?paste=${pasteData.id}`;
     shareLinkElement.href = pasteUrl;
     shareLinkElement.textContent = pasteUrl;
-
     if (rawLinkElement) {
         rawLinkElement.href = `${pasteUrl}&raw=true`;
     }
@@ -487,5 +544,169 @@ if(headerNewPasteLink && headerNewPasteLink.textContent.includes("Drop a New Pas
     headerNewPasteLink.addEventListener('click', (e) => {
         e.preventDefault();
         showPasteInputArea();
+    });
+}
+
+// Function to display messages in auth forms
+function displayAuthMessage(element, message, isSuccess) {
+    element.textContent = message;
+    element.className = 'auth-message'; // Reset classes
+    if (isSuccess) {
+        element.classList.add('success');
+    } else {
+        element.classList.add('error');
+    }
+    element.style.display = 'block';
+}
+
+// Event Handlers for Auth
+async function handleRegisterSubmit(event) {
+    event.preventDefault();
+    const username = registerFormElement.username.value;
+    const email = registerFormElement.email.value; // Optional
+    const password = registerFormElement.password.value;
+    registerMessageElement.style.display = 'none'; // Clear previous messages
+
+    try {
+        const response = await fetch('/api/users/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, email, password }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Registration failed.');
+        }
+        displayAuthMessage(registerMessageElement, data.message, true);
+        // Optionally clear form or switch to login
+        registerFormElement.reset();
+        setTimeout(() => showView('login'), 2000); // Switch to login after 2s
+    } catch (error) {
+        console.error('Registration error:', error);
+        displayAuthMessage(registerMessageElement, error.message, false);
+    }
+}
+
+async function handleLoginSubmit(event) {
+    event.preventDefault();
+    const username = loginFormElement.username.value;
+    const password = loginFormElement.password.value;
+    loginMessageElement.style.display = 'none'; // Clear previous messages
+
+    try {
+        const response = await fetch('/api/users/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Login failed.');
+        }
+        
+        authToken = data.token;
+        currentUser = data.user;
+        localStorage.setItem('authToken', authToken);
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+        displayAuthMessage(loginMessageElement, data.message, true);
+        updateUserNavUI();
+        // Decide what view to show after login. If a paste was being viewed, stay there, otherwise go to input.
+        if (window.location.search.includes('paste=')) {
+             handleUrlOrNavigation(); // Re-evaluate URL to show paste if it was being viewed
+        } else {
+            showView('pasteInput');
+        }
+        loginFormElement.reset();
+    } catch (error) {
+        console.error('Login error:', error);
+        displayAuthMessage(loginMessageElement, error.message, false);
+    }
+}
+
+function handleLogout() {
+    authToken = null;
+    currentUser = null;
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('currentUser');
+    updateUserNavUI();
+    showView('login'); // Or 'pasteInput', depending on desired behavior after logout
+    // Any other cleanup related to user session
+}
+
+// Initial Page Load Logic
+function initializeAuth() {
+    const storedToken = localStorage.getItem('authToken');
+    const storedUser = localStorage.getItem('currentUser');
+
+    if (storedToken && storedUser) {
+        authToken = storedToken;
+        try {
+            currentUser = JSON.parse(storedUser);
+            // Optional: verify token with a backend call here if it could be expired
+            // For now, we assume if it exists and parses, it's good for UI purposes
+        } catch (e) {
+            console.error('Error parsing stored user data:', e);
+            // Clear invalid stored data
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            authToken = null;
+            currentUser = null;
+        }
+    }
+    updateUserNavUI(); // Update nav based on stored or null auth state
+    // Determine initial view based on auth state and URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const pasteId = urlParams.get('paste');
+    if (pasteId) {
+        handleUrlOrNavigation(); // This will show paste display or prompt for password
+    } else if (currentUser) {
+        showView('pasteInput');
+    } else {
+        showView('login'); // Default to login if not logged in and no specific paste
+    }
+}
+
+// Add new Auth Event Listeners
+if (navLoginElement) {
+    navLoginElement.addEventListener('click', (e) => {
+        e.preventDefault();
+        showView('login');
+    });
+}
+if (navRegisterElement) {
+    navRegisterElement.addEventListener('click', (e) => {
+        e.preventDefault();
+        showView('register');
+    });
+}
+if (navLogoutElement) {
+    navLogoutElement.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleLogout();
+    });
+}
+if (navDropNewPasteElement) {
+    navDropNewPasteElement.addEventListener('click', (e) => {
+        e.preventDefault();
+        showView('pasteInput'); // Or handleUrlOrNavigation if you want to preserve query params
+    });
+}
+if (registerFormElement) {
+    registerFormElement.addEventListener('submit', handleRegisterSubmit);
+}
+if (loginFormElement) {
+    loginFormElement.addEventListener('submit', handleLoginSubmit);
+}
+if (switchToLoginLink) {
+    switchToLoginLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        showView('login');
+    });
+}
+if (switchToRegisterLink) {
+    switchToRegisterLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        showView('register');
     });
 }
