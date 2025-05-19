@@ -15,6 +15,7 @@ const pastePasswordElement = document.getElementById('pastePassword');
 const burnAfterReadElement = document.getElementById('burnAfterRead');
 const pasteTitleElement = document.getElementById('pasteTitle');
 const createPasteBtnElement = document.getElementById('createPasteBtn');
+const pasteCustomAliasElement = document.getElementById('pasteCustomAlias');
 
 const pasteInputAreaElement = document.querySelector('.paste-input-area');
 const pasteDisplayAreaElement = document.querySelector('.paste-display-area');
@@ -55,7 +56,7 @@ const tickerPauseIcon = document.getElementById('tickerPauseIcon');
 const tickerPlayIcon = document.getElementById('tickerPlayIcon');
 const tokenTypeSelectorElement = document.getElementById('tokenTypeSelector');
 let isTickerPaused = false;
-let currentTickerType = 'top10crypto'; // Default to top 10 crypto
+let currentTickerType = 'top25crypto'; // Default to top 25 crypto
 
 const GNEWS_API_KEY = process.env.GNEWS_API_KEY; // USER PROVIDED API KEY
 
@@ -239,6 +240,7 @@ function showPasteInputArea() {
     showView('pasteInput');
     if (pasteInputElement) pasteInputElement.value = '';
     if (pasteTitleElement) pasteTitleElement.value = '';
+    if (pasteCustomAliasElement) pasteCustomAliasElement.value = '';
     if (pasteExpirationElement) pasteExpirationElement.value = '1d';
     if (syntaxHighlightingElement) syntaxHighlightingElement.value = 'none';
     if (pasteExposureElement) pasteExposureElement.value = 'public';
@@ -279,12 +281,14 @@ function showPasteDisplayArea(pasteData) {
         }
     }
 
-    const pasteUrl = `${window.location.origin}${window.location.pathname}?paste=${pasteData.id}`;
+    const displayId = pasteData.custom_alias || pasteData.id;
+    const pasteUrl = `${window.location.origin}${window.location.pathname}?paste=${displayId}`;
     shareLinkElement.href = pasteUrl;
     shareLinkElement.textContent = pasteUrl;
     if (rawLinkElement) {
         rawLinkElement.href = `${pasteUrl}&raw=true`;
     }
+    window.history.pushState(pasteData, pasteData.title || 'MyGuy Paste', `${window.location.pathname}?paste=${displayId}`);
 }
 
 // Event Listeners
@@ -303,6 +307,8 @@ if (createPasteBtnElement) {
             syntax: syntaxHighlightingElement.value,
             exposure: pasteExposureElement.value,
             folder: pasteFolderElement.value,
+            password: pastePasswordElement.value,
+            custom_alias: pasteCustomAliasElement.value.trim() || null
         };
 
         try {
@@ -381,7 +387,7 @@ async function handleUrlOrNavigation() {
 
 // New function to fetch and display a single paste, handling password protection
 async function fetchAndDisplayPaste(pasteId, providedPassword = null) {
-    let fetchUrl = `/api/pastes?id=${pasteId}`;
+    let fetchUrl = `/api/pastes?id=${encodeURIComponent(pasteId)}`;
     if (providedPassword) {
         fetchUrl += `&password=${encodeURIComponent(providedPassword)}`;
     }
@@ -413,8 +419,8 @@ async function fetchAndDisplayPaste(pasteId, providedPassword = null) {
         
         // If response is OK (200)
         showPasteDisplayArea(responseData); // responseData is the pasteData here
-        // Ensure URL reflects the paste ID, but not the password if it was in query params for fetch
-        window.history.pushState(responseData, responseData.title || 'MyGuy Paste', `${window.location.pathname}?paste=${pasteId}`);
+        // The showPasteDisplayArea function will now handle updating the URL with alias or ID
+        // window.history.pushState(responseData, responseData.title || 'MyGuy Paste', `${window.location.pathname}?paste=${pasteId}`); // This line is now handled by showPasteDisplayArea
 
     } catch (e) {
         console.error("Error in fetchAndDisplayPaste:", e);
@@ -431,10 +437,13 @@ async function fetchAINews(apiKey) {
         return;
     }
 
-    // Simpler query for troubleshooting and broader topics
-    const query = '(cryptocurrency OR crypto OR blockchain) OR ("artificial intelligence" OR AI)';
-    const url = `https://gnews.io/api/v4/search?q=${encodeURIComponent(query)}&lang=en&max=3&topic=technology,business&sortby=relevance&apikey=${apiKey}`;
-    // Removed &topic=world from previous attempt to be more focused, kept sortby=relevance
+    // Refined query: Focus on broader crypto terms and ensure AI is distinct.
+    const cryptoQuery = '(cryptocurrency OR blockchain OR crypto regulation OR digital assets)';
+    const aiQuery = '("artificial intelligence" OR AI OR machine learning)';
+    const combinedQuery = `${cryptoQuery} OR ${aiQuery}`;
+    
+    const url = `https://gnews.io/api/v4/search?q=${encodeURIComponent(combinedQuery)}&lang=en&max=5&topic=technology,business&sortby=relevance&apikey=${apiKey}`;
+    console.log('Fetching GNews with URL:', url); // Log the exact URL
 
     try {
         const response = await fetch(url);
@@ -755,37 +764,27 @@ if (tokenTypeSelectorElement) {
     });
 }
 
-async function fetchCryptoPrices(type = 'top10crypto') {
+async function fetchCryptoPrices(type = 'top25crypto') {
     if (!tickerMoveElement) return;
-    currentTickerType = type; // Store current type
+    currentTickerType = type; 
+    tickerMoveElement.innerHTML = '<div class="ticker-item">Loading prices...</div>'; // Loading indicator
 
-    let coinIds = '';
-    let symbols = {}; // Symbols map specific to current fetch type
+    let apiUrl = '';
+    let isCoinMarketsEndpoint = false;
 
-    if (type === 'top10crypto') {
-        coinIds = 'bitcoin,ethereum,tether,binancecoin,solana,ripple,usd-coin,cardano,dogecoin,tron';
-        symbols = {
-            bitcoin: 'BTC', ethereum: 'ETH', tether: 'USDT', binancecoin: 'BNB', solana: 'SOL',
-            ripple: 'XRP', "usd-coin": 'USDC', cardano: 'ADA', dogecoin: 'DOGE', tron: 'TRX'
-        };
+    if (type === 'top25crypto') {
+        isCoinMarketsEndpoint = true;
+        apiUrl = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=25&page=1&sparkline=false`;
     } else if (type === 'aiTokens') {
-        // Example AI Tokens - these IDs need to be valid CoinGecko IDs
-        coinIds = 'bittensor,render-token,fetch-ai,singularitynet,the-graph, Akash-Network,OriginTrail,Oraichain-Token,RSS3,Numeraire'; // Added more
-        symbols = {
-            bittensor: 'TAO', "render-token": 'RNDR', "fetch-ai": 'FET', 
-            singularitynet: 'AGIX', "the-graph": 'GRT', "akash-network": 'AKT', 
-            "origintrail": 'TRAC', "oraichain-token": 'ORAI', "rss3": 'RSS3', "numeraire": 'NMR'
-            // Add more as needed, ensuring keys match CoinGecko IDs from coinIds string
-        };
-    }
-
-    if (!coinIds) {
-        tickerMoveElement.innerHTML = '<div class="ticker-item">Please select a token type.</div>';
+        // For AI tokens, we still use specific IDs as CoinGecko doesn't have a simple category for "Top AI by market cap" via a single category ID.
+        // We can curate a list of prominent AI token IDs.
+        // These IDs must be CoinGecko's own IDs for the coins.
+        const aiCoinIds = 'bittensor,render-token,fetch-ai,singularitynet,the-graph,akash-network,origintrail,oraichain-token,rss3,numeraire,ocean-protocol,iexec-rlc,agi-process-publisher,deepbrain-chain,chain<y_bin_86>gpt'; // Example list, ensure these are valid CG IDs
+        apiUrl = `https://api.coingecko.com/api/v3/simple/price?ids=${aiCoinIds}&vs_currencies=usd&include_24hr_change=true`;
+    } else {
+        tickerMoveElement.innerHTML = '<div class="ticker-item">Invalid token type selected.</div>';
         return;
     }
-
-    const vsCurrency = 'usd';
-    const apiUrl = `https://api.coingecko.com/api/v3/simple/price?ids=${coinIds}&vs_currencies=${vsCurrency}&include_24hr_change=true`;
 
     try {
         const response = await fetch(apiUrl);
@@ -793,56 +792,70 @@ async function fetchCryptoPrices(type = 'top10crypto') {
             throw new Error(`CoinGecko API error: ${response.status}`);
         }
         const data = await response.json();
-        populateTicker(data);
+        populateTicker(data, isCoinMarketsEndpoint);
     } catch (error) {
         console.error('Error fetching crypto prices:', error);
         tickerMoveElement.innerHTML = '<div class="ticker-item">Error loading prices.</div>';
     }
 }
 
-function populateTicker(priceData) {
+function populateTicker(priceData, isCoinMarketsData) {
     if (!tickerMoveElement) return;
-    tickerMoveElement.innerHTML = ''; // Clear old prices
+    tickerMoveElement.innerHTML = ''; 
 
-    // Determine symbols map based on the currentTickerType that was used for the fetch
-    let symbols = {};
-    if (currentTickerType === 'top10crypto') {
-        symbols = {
-            bitcoin: 'BTC', ethereum: 'ETH', tether: 'USDT', binancecoin: 'BNB', solana: 'SOL',
-            ripple: 'XRP', "usd-coin": 'USDC', cardano: 'ADA', dogecoin: 'DOGE', tron: 'TRX'
-        };
-    } else if (currentTickerType === 'aiTokens') {
-        symbols = {
+    const itemsToDisplay = isCoinMarketsData ? priceData : Object.entries(priceData).map(([id, data]) => ({ ...data, id, symbol: id.toUpperCase() /* Placeholder, will try to get real symbol*/ })); 
+
+    // Need to get symbols for the simple price endpoint if not using markets
+    let symbolsMap = {};
+    if (!isCoinMarketsData && currentTickerType === 'aiTokens') {
+         symbolsMap = {
             bittensor: 'TAO', "render-token": 'RNDR', "fetch-ai": 'FET', 
             singularitynet: 'AGIX', "the-graph": 'GRT', "akash-network": 'AKT', 
-            "origintrail": 'TRAC', "oraichain-token": 'ORAI', "rss3": 'RSS3', "numeraire": 'NMR'
+            "origintrail": 'TRAC', "oraichain-token": 'ORAI', "rss3": 'RSS3', "numeraire": 'NMR',
+            "ocean-protocol": 'OCEAN', "iexec-rlc": 'RLC', "agi-process-publisher": 'AGP', // Made up symbol for example
+            "deepbrain-chain": 'DBC', "chainers": 'CHAIN' // Made up symbol for example, ensure correct ones from CoinGecko
         };
     }
 
-    for (const id in priceData) {
-        if (priceData.hasOwnProperty(id)) {
-            const coin = priceData[id];
-            const symbol = symbols[id] || id.toUpperCase();
-            const price = coin.usd.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-            const change = coin.usd_24h_change;
-            const changeClass = change >= 0 ? 'positive' : 'negative';
-            const changeFormatted = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+    itemsToDisplay.forEach(coin => {
+        const symbol = isCoinMarketsData ? coin.symbol.toUpperCase() : (symbolsMap[coin.id] || coin.id.toUpperCase());
+        const price = isCoinMarketsData ? coin.current_price : coin.usd;
+        const change = isCoinMarketsData ? coin.price_change_percentage_24h : coin.usd_24h_change;
 
-            const itemDiv = document.createElement('div');
-            itemDiv.classList.add('ticker-item');
-            itemDiv.innerHTML = `
-                <span class="coin-symbol">${symbol}:</span>
-                <span class="coin-price">${price}</span>
-                <span class="coin-change ${changeClass}">(${changeFormatted})</span>
-            `;
-            tickerMoveElement.appendChild(itemDiv);
-        }
+        if (price === undefined || change === undefined) return; // Skip if data is incomplete
+
+        const priceFormatted = price.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+        const changeClass = change >= 0 ? 'positive' : 'negative';
+        const changeFormatted = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+
+        const itemDiv = document.createElement('div');
+        itemDiv.classList.add('ticker-item');
+        itemDiv.innerHTML = `
+            <span class="coin-symbol">${symbol}:</span>
+            <span class="coin-price">${priceFormatted}</span>
+            <span class="coin-change ${changeClass}">(${changeFormatted})</span>
+        `;
+        tickerMoveElement.appendChild(itemDiv);
+    });
+
+    if (tickerMoveElement.children.length === 0) {
+        tickerMoveElement.innerHTML = '<div class="ticker-item">No data available for selected tokens.</div>';
+        return;
     }
-    // Duplicate items for seamless scrolling effect if content is not wide enough
-    // This simple duplication might need adjustment based on number of items and screen width
-    if (tickerMoveElement.children.length > 0 && tickerMoveElement.offsetWidth < tickerMoveElement.parentElement.offsetWidth * 2) {
-        const originalItems = tickerMoveElement.innerHTML;
-        tickerMoveElement.innerHTML += originalItems; // Duplicate for smoother scroll
+    
+    // Duplicate items for seamless scrolling effect
+    if (tickerMoveElement.children.length > 0 ) {
+        // Simple duplication to fill a reasonable width. May need adjustment.
+        let currentWidth = 0;
+        Array.from(tickerMoveElement.children).forEach(child => currentWidth += child.offsetWidth);
+        const tickerWrapWidth = tickerMoveElement.parentElement.offsetWidth;
+        if (currentWidth < tickerWrapWidth * 1.5 && currentWidth > 0) { // Ensure there is some content
+             const originalItems = tickerMoveElement.innerHTML;
+             tickerMoveElement.innerHTML += originalItems; // Simple duplication
+             if (currentWidth * 2 < tickerWrapWidth * 1.5) { // If still not enough, duplicate again
+                tickerMoveElement.innerHTML += originalItems;
+             }
+        }
     }
 }
 

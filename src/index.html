@@ -17,7 +17,7 @@
     </div>
     <div class="ticker-controls">
         <select id="tokenTypeSelector" aria-label="Select token type">
-            <option value="top10crypto" selected>Top 10 Crypto</option>
+            <option value="top25crypto" selected>Top 25 Crypto</option>
             <option value="aiTokens">Top AI Tokens</option>
         </select>
         <button id="tickerPlayPause" aria-label="Pause Ticker">
@@ -167,6 +167,9 @@
             <input type="checkbox" id="burnAfterRead" name="burnAfterRead">
             <label for="burnAfterRead" class="inline-label">Burn after read (Future feature)</label>
           </div>
+
+          <label for="pasteCustomAlias">Custom URL Alias (optional, 3-50 chars, a-z, 0-9, -, _):</label>
+          <input type="text" id="pasteCustomAlias" placeholder="e.g., my-cool-notes">
 
           <label for="pasteTitle">Title it (optional, fam):</label>
           <input type="text" id="pasteTitle" placeholder="Enter a title (optional)">
