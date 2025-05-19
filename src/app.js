@@ -767,7 +767,7 @@ if (tokenTypeSelectorElement) {
 async function fetchCryptoPrices(type = 'top25crypto') {
     if (!tickerMoveElement) return;
     currentTickerType = type; 
-    tickerMoveElement.innerHTML = '<div class="ticker-item">Loading prices...</div>'; // Loading indicator
+    tickerMoveElement.innerHTML = '<div class="ticker-item">Loading prices...</div>';
 
     let apiUrl = '';
     let isCoinMarketsEndpoint = false;
@@ -776,10 +776,8 @@ async function fetchCryptoPrices(type = 'top25crypto') {
         isCoinMarketsEndpoint = true;
         apiUrl = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=25&page=1&sparkline=false`;
     } else if (type === 'aiTokens') {
-        // For AI tokens, we still use specific IDs as CoinGecko doesn't have a simple category for "Top AI by market cap" via a single category ID.
-        // We can curate a list of prominent AI token IDs.
-        // These IDs must be CoinGecko's own IDs for the coins.
-        const aiCoinIds = 'bittensor,render-token,fetch-ai,singularitynet,the-graph,akash-network,origintrail,oraichain-token,rss3,numeraire,ocean-protocol,iexec-rlc,agi-process-publisher,deepbrain-chain,chain<y_bin_86>gpt'; // Example list, ensure these are valid CG IDs
+        isCoinMarketsEndpoint = false; // Explicitly set for clarity
+        const aiCoinIds = 'bittensor,render-token,fetch-ai,singularitynet,the-graph,akash-network,origintrail,oraichain-token,rss3,numeraire,ocean-protocol,iexec-rlc,paal-ai,genshiro,aurus-token,sleepless-ai,graphlinq-protocol,aion,effect-network,SingularityDAO'; // Expanded, verify these IDs from CoinGecko
         apiUrl = `https://api.coingecko.com/api/v3/simple/price?ids=${aiCoinIds}&vs_currencies=usd&include_24hr_change=true`;
     } else {
         tickerMoveElement.innerHTML = '<div class="ticker-item">Invalid token type selected.</div>';
@@ -803,26 +801,33 @@ function populateTicker(priceData, isCoinMarketsData) {
     if (!tickerMoveElement) return;
     tickerMoveElement.innerHTML = ''; 
 
-    const itemsToDisplay = isCoinMarketsData ? priceData : Object.entries(priceData).map(([id, data]) => ({ ...data, id, symbol: id.toUpperCase() /* Placeholder, will try to get real symbol*/ })); 
+    const itemsToDisplay = isCoinMarketsData ? priceData : Object.entries(priceData).map(([id, data]) => ({ ...data, id, symbol: id.toUpperCase() })); 
+    console.log(`Populating ticker. isCoinMarketsData: ${isCoinMarketsData}, Items received: ${itemsToDisplay.length}`);
 
-    // Need to get symbols for the simple price endpoint if not using markets
-    let symbolsMap = {};
+    let symbolsMap = {}; // This will only be used if !isCoinMarketsData (i.e., for aiTokens)
     if (!isCoinMarketsData && currentTickerType === 'aiTokens') {
-         symbolsMap = {
+         symbolsMap = { // VERIFY ALL THESE IDs and SYMBOLS from CoinGecko
             bittensor: 'TAO', "render-token": 'RNDR', "fetch-ai": 'FET', 
             singularitynet: 'AGIX', "the-graph": 'GRT', "akash-network": 'AKT', 
             "origintrail": 'TRAC', "oraichain-token": 'ORAI', "rss3": 'RSS3', "numeraire": 'NMR',
-            "ocean-protocol": 'OCEAN', "iexec-rlc": 'RLC', "agi-process-publisher": 'AGP', // Made up symbol for example
-            "deepbrain-chain": 'DBC', "chainers": 'CHAIN' // Made up symbol for example, ensure correct ones from CoinGecko
+            "ocean-protocol": 'OCEAN', "iexec-rlc": 'RLC', "paal-ai": 'PAAL', 
+            "genshiro": 'GENS', "aurus-token": 'AWX', "sleepless-ai": 'AI',
+            "graphlinq-protocol": 'GLQ', "aion": 'AION', "effect-network": 'EFX', "singularitydao": 'SDAO'
         };
     }
 
+    let processedCount = 0;
     itemsToDisplay.forEach(coin => {
-        const symbol = isCoinMarketsData ? coin.symbol.toUpperCase() : (symbolsMap[coin.id] || coin.id.toUpperCase());
+        const id = isCoinMarketsData ? coin.id : coin.id; // For AI tokens, coin.id comes from the map structure
+        const symbol = isCoinMarketsData ? coin.symbol.toUpperCase() : (symbolsMap[id] || id.toUpperCase());
         const price = isCoinMarketsData ? coin.current_price : coin.usd;
         const change = isCoinMarketsData ? coin.price_change_percentage_24h : coin.usd_24h_change;
 
-        if (price === undefined || change === undefined) return; // Skip if data is incomplete
+        if (price === undefined || change === undefined) {
+            console.warn(`Skipping ticker item due to incomplete data for ID: ${id}`);
+            return; 
+        }
+        processedCount++;
 
         const priceFormatted = price.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
         const changeClass = change >= 0 ? 'positive' : 'negative';
@@ -842,19 +847,22 @@ function populateTicker(priceData, isCoinMarketsData) {
         tickerMoveElement.innerHTML = '<div class="ticker-item">No data available for selected tokens.</div>';
         return;
     }
+    console.log(`Processed ${processedCount} items for the ticker.`);
     
     // Duplicate items for seamless scrolling effect
     if (tickerMoveElement.children.length > 0 ) {
-        // Simple duplication to fill a reasonable width. May need adjustment.
-        let currentWidth = 0;
-        Array.from(tickerMoveElement.children).forEach(child => currentWidth += child.offsetWidth);
-        const tickerWrapWidth = tickerMoveElement.parentElement.offsetWidth;
-        if (currentWidth < tickerWrapWidth * 1.5 && currentWidth > 0) { // Ensure there is some content
-             const originalItems = tickerMoveElement.innerHTML;
-             tickerMoveElement.innerHTML += originalItems; // Simple duplication
-             if (currentWidth * 2 < tickerWrapWidth * 1.5) { // If still not enough, duplicate again
-                tickerMoveElement.innerHTML += originalItems;
+        let currentContentWidth = 0;
+        Array.from(tickerMoveElement.children).forEach(child => {currentContentWidth += child.offsetWidth;});
+        const tickerVisibleWidth = tickerMoveElement.parentElement.offsetWidth;
+        
+        if (currentContentWidth > 0 && currentContentWidth < tickerVisibleWidth * 2) { // If content is less than twice the visible width
+             const originalItemsHTML = tickerMoveElement.innerHTML;
+             let duplications = 1;
+             while (currentContentWidth * (duplications + 1) < tickerVisibleWidth * 2.5 && duplications < 5) { // Ensure at least ~2.5x visible width or max 5 dups
+                tickerMoveElement.innerHTML += originalItemsHTML;
+                duplications++;
              }
+             console.log(`Ticker content duplicated ${duplications} time(s). Original width: ${currentContentWidth}, Visible width: ${tickerVisibleWidth}`);
         }
     }
 }
