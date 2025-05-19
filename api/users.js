@@ -17,11 +17,17 @@ function sendResponse(res, statusCode, body) {
 }
 
 export default async function handler(req, res) {
+    console.log(`[api/users.js] Received request: Method=${req.method}, URL=${req.url}`); // Basic entry log
     const { url, method, body } = req;
 
+    // Normalize URL to remove potential base path if Vercel includes it differently
+    const requestPath = new URL(url, `http://${req.headers.host}`).pathname;
+    console.log(`[api/users.js] Normalized requestPath: ${requestPath}`);
+
     if (method === 'POST') {
-        if (url.endsWith('/users/register')) {
+        if (requestPath === '/api/users/register') {
             // ==== REGISTER ====
+            console.log('[api/users.js] Attempting registration...');
             try {
                 const { username, email, password } = body;
 
@@ -65,8 +71,9 @@ export default async function handler(req, res) {
                 return sendResponse(res, 500, { message: 'Server error during registration.' });
             }
 
-        } else if (url.endsWith('/users/login')) {
+        } else if (requestPath === '/api/users/login') {
             // ==== LOGIN ====
+            console.log('[api/users.js] Attempting login...');
             try {
                 const { username, password } = body;
 
