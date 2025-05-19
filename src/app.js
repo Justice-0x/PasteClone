@@ -22,14 +22,18 @@ const pasteDisplayAreaElement = document.querySelector('.paste-display-area');
 const displayTitleElement = document.getElementById('displayTitle');
 const pasteOutputElement = document.getElementById('pasteOutput');
 const shareLinkElement = document.getElementById('shareLink');
+const rawLinkElement = document.getElementById('rawLink');
 const copyLinkBtnElement = document.getElementById('copyLinkBtn');
 const createNewPasteLinkBtnElement = document.getElementById('createNewPasteLinkBtn');
 const recentPastesListElement = document.getElementById('recentPastesList');
 const aiNewsContainerElement = document.getElementById('aiNewsContainer');
 const themeSelectorElement = document.getElementById('themeSelector');
 const matrixCanvasElement = document.getElementById('matrixCanvas');
+const downloadPasteBtnElement = document.getElementById('downloadPasteBtn');
 
 const GNEWS_API_KEY = 'af40488155eaf6efee4246d45bc58de4'; // USER PROVIDED API KEY
+
+let currentPasteData = null; // To store the currently displayed paste data for download
 
 // Matrix Effect Variables
 let matrixCtx;
@@ -132,11 +136,6 @@ if (themeSelectorElement) {
     });
 }
 
-// Generate a random ID for pastes
-function generatePasteId() {
-    return Math.random().toString(36).substring(2, 10);
-}
-
 // Copy text to clipboard
 function copyToClipboard(text, buttonElement) {
     navigator.clipboard.writeText(text).then(() => {
@@ -163,6 +162,7 @@ function showPasteInputArea() {
     if (pasteExposureElement) pasteExposureElement.value = 'public';
     if (pastePasswordElement) pastePasswordElement.value = '';
     if (burnAfterReadElement) burnAfterReadElement.checked = false;
+    currentPasteData = null; // Clear current paste data when going to input area
 
     window.history.pushState({}, '', window.location.pathname); // Clear URL params
     startMatrix();
@@ -172,6 +172,8 @@ function showPasteDisplayArea(pasteData) {
     pasteInputAreaElement.style.display = 'none';
     pasteDisplayAreaElement.style.display = 'block';
     stopMatrix();
+
+    currentPasteData = pasteData; // Store for download functionality
 
     displayTitleElement.textContent = pasteData.title || 'MyGuy\'s Fresh Drop';
     
@@ -213,29 +215,10 @@ function showPasteDisplayArea(pasteData) {
     const pasteUrl = `${window.location.origin}${window.location.pathname}?paste=${pasteData.id}`;
     shareLinkElement.href = pasteUrl;
     shareLinkElement.textContent = pasteUrl;
-}
 
-function loadRecentPastes() {
-    if (!recentPastesListElement) return;
-    recentPastesListElement.innerHTML = ''; // Clear existing
-    const keys = Object.keys(localStorage);
-    const pasteKeys = keys.filter(key => key.startsWith('paste_')).reverse().slice(0, 5); // Get last 5
-
-    pasteKeys.forEach(key => {
-        try {
-            const pasteData = JSON.parse(localStorage.getItem(key));
-            if (pasteData && pasteData.id && pasteData.title) {
-                const listItem = document.createElement('li');
-                const link = document.createElement('a');
-                link.href = `${window.location.pathname}?paste=${pasteData.id}`;
-                link.textContent = pasteData.title || 'Untitled Paste';
-                listItem.appendChild(link);
-                recentPastesListElement.appendChild(listItem);
-            }
-        } catch (e) {
-            console.error("Error parsing recent paste from localStorage", e);
-        }
-    });
+    if (rawLinkElement) {
+        rawLinkElement.href = `${pasteUrl}&raw=true`;
+    }
 }
 
 // Event Listeners
@@ -247,29 +230,38 @@ if (createPasteBtnElement) {
             return;
         }
 
-        const pasteId = generatePasteId();
-        const pasteData = {
-            id: pasteId,
+        const pasteDataForServer = {
             content: content,
-            title: pasteTitleElement.value || 'MyGuy\'s Fresh Drop',
+            title: pasteTitleElement.value,
             expiration: pasteExpirationElement.value,
             syntax: syntaxHighlightingElement.value,
             exposure: pasteExposureElement.value,
             folder: pasteFolderElement.value,
-            // password: pastePasswordElement.value, // Implement secure handling for passwords
-            // burnAfterRead: burnAfterReadElement.checked,
-            timestamp: new Date().toISOString()
         };
 
         try {
-            localStorage.setItem(`paste_${pasteId}`, JSON.stringify(pasteData));
-            showPasteDisplayArea(pasteData);
-            loadRecentPastes(); // Refresh recent pastes list
-            // Update URL to reflect the paste ID without causing a page reload
-            window.history.pushState(pasteData, pasteData.title || 'MyGuy Paste', `${window.location.pathname}?paste=${pasteId}`);
+            const response = await fetch('/api/pastes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(pasteDataForServer),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+
+            const createdPaste = await response.json();
+
+            showPasteDisplayArea(createdPaste);
+            window.history.pushState(createdPaste, createdPaste.title || 'MyGuy Paste', `${window.location.pathname}?paste=${createdPaste.id}`);
+            fetchAndDisplayRecentPastes(); // Refresh recent pastes list
+        
         } catch (error) {
-            console.error('Error saving paste:', error);
-            alert('My bad! Couldn\'t save this drop. LocalStorage might be packed.');
+            console.error('Error creating paste via API:', error);
+            alert(`My bad! Couldn\'t save this drop: ${error.message}`);
         }
     });
 }
@@ -287,34 +279,83 @@ if (copyLinkBtnElement) {
 if (createNewPasteLinkBtnElement) {
     createNewPasteLinkBtnElement.addEventListener('click', () => {
         showPasteInputArea();
-        loadRecentPastes();
+    });
+}
+
+if (downloadPasteBtnElement) {
+    downloadPasteBtnElement.addEventListener('click', () => {
+        if (currentPasteData && currentPasteData.content) {
+            const filename = (currentPasteData.title || 'MyGuy-Paste').replace(/[^a-z0-9\s_.-]/gi, '_') + '.txt';
+            const blob = new Blob([currentPasteData.content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } else {
+            alert('No drop loaded to snag as a file, G!');
+        }
     });
 }
 
 // Handle direct URL access to a paste and back/forward navigation
-function handleUrlOrNavigation() {
+async function handleUrlOrNavigation() {
     const urlParams = new URLSearchParams(window.location.search);
     const pasteId = urlParams.get('paste');
 
     if (pasteId) {
-        const pasteDataString = localStorage.getItem(`paste_${pasteId}`);
-        if (pasteDataString) {
-            try {
-                const pasteData = JSON.parse(pasteDataString);
-                showPasteDisplayArea(pasteData);
-            } catch (e) {
-                console.error("Error parsing paste data from localStorage", e);
-                alert("This drop\'s data is lookin\' sus. Can\'t load it.");
-                showPasteInputArea();
-            }
-        } else {
-            alert('Can\'t find that drop, G. Maybe it ghosted?');
-            showPasteInputArea(); // Show input area if paste not found
-        }
+        await fetchAndDisplayPaste(pasteId);       
     } else {
         showPasteInputArea();
     }
-    loadRecentPastes();
+}
+
+// New function to fetch and display a single paste, handling password protection
+async function fetchAndDisplayPaste(pasteId, providedPassword = null) {
+    let fetchUrl = `/api/pastes?id=${pasteId}`;
+    if (providedPassword) {
+        fetchUrl += `&password=${encodeURIComponent(providedPassword)}`;
+    }
+
+    try {
+        const response = await fetch(fetchUrl);
+        const responseData = await response.json(); // Try to parse JSON regardless of ok status for error messages
+
+        if (!response.ok) {
+            if (response.status === 401 && responseData.passwordRequired) {
+                const userPassword = prompt(responseData.message || 'This drop is locked. Enter password, G:');
+                if (userPassword) {
+                    // User entered a password, try fetching again with it
+                    await fetchAndDisplayPaste(pasteId, userPassword);
+                } else {
+                    // User cancelled prompt or entered nothing
+                    alert('No password provided. Can\'t unlock this drop.');
+                    showPasteInputArea(); // Go back to input area
+                    window.history.pushState({}, '', window.location.pathname); // Clear URL params
+                }
+            } else {
+                // Other errors (404, 500, or 401 without passwordRequired flag)
+                alert(responseData.message || `Can\'t find that drop, G. Maybe it ghosted or never existed? Status: ${response.status}`);
+                showPasteInputArea();
+                window.history.pushState({}, '', window.location.pathname); // Clear URL params
+            }
+            return; // Stop further processing if not ok
+        }
+        
+        // If response is OK (200)
+        showPasteDisplayArea(responseData); // responseData is the pasteData here
+        // Ensure URL reflects the paste ID, but not the password if it was in query params for fetch
+        window.history.pushState(responseData, responseData.title || 'MyGuy Paste', `${window.location.pathname}?paste=${pasteId}`);
+
+    } catch (e) {
+        console.error("Error in fetchAndDisplayPaste:", e);
+        alert(`This drop\'s data is lookin\' sus. Can\'t load it: ${e.message}`);
+        showPasteInputArea();
+        window.history.pushState({}, '', window.location.pathname); // Clear URL params
+    }
 }
 
 async function fetchAINews(apiKey) {
@@ -369,6 +410,56 @@ async function fetchAINews(apiKey) {
     }
 }
 
+// Function to fetch and display recent pastes
+async function fetchAndDisplayRecentPastes() {
+    if (!recentPastesListElement) return;
+
+    try {
+        const response = await fetch('/api/recent-pastes');
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
+        const recentPastes = await response.json();
+
+        recentPastesListElement.innerHTML = ''; // Clear existing list
+
+        if (recentPastes.length === 0) {
+            recentPastesListElement.innerHTML = '<li>No fresh drops yet, fam.</li>';
+            return;
+        }
+
+        recentPastes.forEach(paste => {
+            const listItem = document.createElement('li');
+            const link = document.createElement('a');
+            link.href = `?paste=${paste.id}`; // Relative link for SPA navigation
+            link.textContent = paste.title || 'Untitled Drop';
+            
+            // Handle click to use SPA navigation for recent pastes
+            link.addEventListener('click', async (e) => {
+                e.preventDefault();
+                // Manually fetch and display this paste, and update history
+                // No password prompt needed here as recent pastes are public
+                await fetchAndDisplayPaste(paste.id);
+            });
+
+            const timestampSpan = document.createElement('span');
+            timestampSpan.className = 'recent-paste-time';
+            timestampSpan.textContent = ` - ${new Date(paste.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            
+            listItem.appendChild(link);
+            listItem.appendChild(timestampSpan);
+            recentPastesListElement.appendChild(listItem);
+        });
+
+    } catch (error) {
+        console.error('Error fetching recent pastes:', error);
+        if (recentPastesListElement) {
+            recentPastesListElement.innerHTML = '<li>Could not load recent drops. Bummer.</li>';
+        }
+    }
+}
+
 // Listen for popstate events (back/forward browser buttons)
 window.addEventListener('popstate', (event) => {
     handleUrlOrNavigation();
@@ -379,6 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTheme(); // Load theme first
     handleUrlOrNavigation();
     fetchAINews(GNEWS_API_KEY);
+    fetchAndDisplayRecentPastes(); // Fetch recent pastes on load
     setInterval(() => fetchAINews(GNEWS_API_KEY), 3600000); // Refresh every hour
     // Initialize matrix here for the first load if input area is shown by default
     if (pasteInputAreaElement && pasteInputAreaElement.style.display !== 'none') {
@@ -395,6 +487,5 @@ if(headerNewPasteLink && headerNewPasteLink.textContent.includes("Drop a New Pas
     headerNewPasteLink.addEventListener('click', (e) => {
         e.preventDefault();
         showPasteInputArea();
-        loadRecentPastes();
     });
 }
