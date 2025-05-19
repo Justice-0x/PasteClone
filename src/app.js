@@ -568,7 +568,7 @@ async function handleRegisterSubmit(event) {
     registerMessageElement.style.display = 'none'; // Clear previous messages
 
     try {
-        const response = await fetch('/api/users/register', {
+        const response = await fetch('/api/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, email, password }),
@@ -594,7 +594,7 @@ async function handleLoginSubmit(event) {
     loginMessageElement.style.display = 'none'; // Clear previous messages
 
     try {
-        const response = await fetch('/api/users/login', {
+        const response = await fetch('/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
