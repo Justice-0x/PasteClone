@@ -774,8 +774,8 @@ body.theme-win95 .sidebar ul li a {
 #asciiLogo {
   font-family: 'Courier New', Courier, monospace;
   color: var(--theme-text); /* Use theme text color */
-  font-size: 10px; /* Increased from 6px */
-  line-height: 0.8; /* Adjusted from 0.7 */
+  font-size: 8px; /* Adjusted from 10px */
+  line-height: 0.9; /* Adjusted from 0.8 */
   white-space: pre;
   margin: 0 auto; /* Center it if header becomes flex column */
   text-align: center; /* Center the text within the pre block */
