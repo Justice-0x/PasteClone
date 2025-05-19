@@ -774,12 +774,15 @@ body.theme-win95 .sidebar ul li a {
 #asciiLogo {
   font-family: 'Courier New', Courier, monospace;
   color: var(--theme-text); /* Use theme text color */
-  font-size: 8px; /* Adjusted from 10px */
-  line-height: 0.9; /* Adjusted from 0.8 */
+  font-size: 6px; /* Smaller font size */
+  line-height: 0.7; /* Tighter line height */
   white-space: pre;
   margin: 0 auto; /* Center it if header becomes flex column */
   text-align: center; /* Center the text within the pre block */
   padding: 0.5rem 0; /* Some vertical padding */
+  letter-spacing: 0px; /* Ensure no extra letter spacing */
+  display: block; /* Ensure block behavior */
+  overflow: visible; /* Ensure no part is hidden for now */
 }
 
 body.theme-win95 #asciiLogo {
