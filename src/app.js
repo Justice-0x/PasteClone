@@ -53,7 +53,9 @@ const tickerMoveElement = document.querySelector('.ticker-move');
 const tickerPlayPauseButton = document.getElementById('tickerPlayPause');
 const tickerPauseIcon = document.getElementById('tickerPauseIcon');
 const tickerPlayIcon = document.getElementById('tickerPlayIcon');
+const tokenTypeSelectorElement = document.getElementById('tokenTypeSelector');
 let isTickerPaused = false;
+let currentTickerType = 'top10crypto'; // Default to top 10 crypto
 
 const GNEWS_API_KEY = process.env.GNEWS_API_KEY; // USER PROVIDED API KEY
 
@@ -429,19 +431,32 @@ async function fetchAINews(apiKey) {
         return;
     }
 
-    const query = '("Artificial Intelligence" OR "AI development" OR "AI ethics") OR ("cryptocurrency news" OR "bitcoin news" OR "ethereum news" OR "blockchain developments" OR "crypto regulation" OR "NFT news")';
-    const url = `https://gnews.io/api/v4/search?q=${encodeURIComponent(query)}&lang=en&max=3&topic=technology,business,world&sortby=relevance&apikey=${apiKey}`;
+    // Simpler query for troubleshooting and broader topics
+    const query = '(cryptocurrency OR crypto OR blockchain) OR ("artificial intelligence" OR AI)';
+    const url = `https://gnews.io/api/v4/search?q=${encodeURIComponent(query)}&lang=en&max=3&topic=technology,business&sortby=relevance&apikey=${apiKey}`;
+    // Removed &topic=world from previous attempt to be more focused, kept sortby=relevance
 
     try {
         const response = await fetch(url);
         if (!response.ok) {
+            let errorMsg = `HTTP error! status: ${response.status}`;
             if (response.status === 401) {
-                throw new Error('GNews API key is invalid.');
+                errorMsg = 'GNews API key is invalid. Please check Vercel environment variables.';
             }
             if (response.status === 403) {
-                throw new Error('GNews API daily quota reached or key forbidden.');
+                errorMsg = 'GNews API daily quota reached or key forbidden. Check your GNews account.';
             }
-            throw new Error(`HTTP error! status: ${response.status}`);
+            if (response.status === 429) {
+                errorMsg = 'Too many requests to GNews API. Please wait a bit.';
+            }
+            // Attempt to get more details from the API response body if available
+            try {
+                const errorData = await response.json();
+                if (errorData && errorData.errors && errorData.errors.length > 0) {
+                    errorMsg += ` Details: ${errorData.errors.join(', ')}`;
+                }
+            } catch (e) { /* Ignore if error response is not JSON */ }
+            throw new Error(errorMsg);
         }
         const data = await response.json();
 
@@ -543,8 +558,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       if (matrixCanvasElement) matrixCanvasElement.style.display = 'none';
     }
-    fetchCryptoPrices(); // Fetch initial crypto prices
-    setInterval(fetchCryptoPrices, 300000); // Refresh crypto prices every 5 minutes
+    fetchCryptoPrices(currentTickerType); // Fetch initial crypto prices based on default type
+    setInterval(() => fetchCryptoPrices(currentTickerType), 300000); // Refresh prices for current type
 });
 
 // Also update the header link to act like "create new paste"
@@ -734,10 +749,41 @@ if (tickerPlayPauseButton) {
     tickerPlayPauseButton.addEventListener('click', toggleTickerAnimation);
 }
 
-async function fetchCryptoPrices() {
-    if (!tickerMoveElement) return;
+if (tokenTypeSelectorElement) {
+    tokenTypeSelectorElement.addEventListener('change', (event) => {
+        fetchCryptoPrices(event.target.value);
+    });
+}
 
-    const coinIds = 'bitcoin,ethereum,solana,cardano,dogecoin,ripple,binancecoin';
+async function fetchCryptoPrices(type = 'top10crypto') {
+    if (!tickerMoveElement) return;
+    currentTickerType = type; // Store current type
+
+    let coinIds = '';
+    let symbols = {}; // Symbols map specific to current fetch type
+
+    if (type === 'top10crypto') {
+        coinIds = 'bitcoin,ethereum,tether,binancecoin,solana,ripple,usd-coin,cardano,dogecoin,tron';
+        symbols = {
+            bitcoin: 'BTC', ethereum: 'ETH', tether: 'USDT', binancecoin: 'BNB', solana: 'SOL',
+            ripple: 'XRP', "usd-coin": 'USDC', cardano: 'ADA', dogecoin: 'DOGE', tron: 'TRX'
+        };
+    } else if (type === 'aiTokens') {
+        // Example AI Tokens - these IDs need to be valid CoinGecko IDs
+        coinIds = 'bittensor,render-token,fetch-ai,singularitynet,the-graph, Akash-Network,OriginTrail,Oraichain-Token,RSS3,Numeraire'; // Added more
+        symbols = {
+            bittensor: 'TAO', "render-token": 'RNDR', "fetch-ai": 'FET', 
+            singularitynet: 'AGIX', "the-graph": 'GRT', "akash-network": 'AKT', 
+            "origintrail": 'TRAC', "oraichain-token": 'ORAI', "rss3": 'RSS3', "numeraire": 'NMR'
+            // Add more as needed, ensuring keys match CoinGecko IDs from coinIds string
+        };
+    }
+
+    if (!coinIds) {
+        tickerMoveElement.innerHTML = '<div class="ticker-item">Please select a token type.</div>';
+        return;
+    }
+
     const vsCurrency = 'usd';
     const apiUrl = `https://api.coingecko.com/api/v3/simple/price?ids=${coinIds}&vs_currencies=${vsCurrency}&include_24hr_change=true`;
 
@@ -758,10 +804,20 @@ function populateTicker(priceData) {
     if (!tickerMoveElement) return;
     tickerMoveElement.innerHTML = ''; // Clear old prices
 
-    const symbols = {
-        bitcoin: 'BTC', ethereum: 'ETH', solana: 'SOL', cardano: 'ADA', 
-        dogecoin: 'DOGE', ripple: 'XRP', binancecoin: 'BNB'
-    };
+    // Determine symbols map based on the currentTickerType that was used for the fetch
+    let symbols = {};
+    if (currentTickerType === 'top10crypto') {
+        symbols = {
+            bitcoin: 'BTC', ethereum: 'ETH', tether: 'USDT', binancecoin: 'BNB', solana: 'SOL',
+            ripple: 'XRP', "usd-coin": 'USDC', cardano: 'ADA', dogecoin: 'DOGE', tron: 'TRX'
+        };
+    } else if (currentTickerType === 'aiTokens') {
+        symbols = {
+            bittensor: 'TAO', "render-token": 'RNDR', "fetch-ai": 'FET', 
+            singularitynet: 'AGIX', "the-graph": 'GRT', "akash-network": 'AKT', 
+            "origintrail": 'TRAC', "oraichain-token": 'ORAI', "rss3": 'RSS3', "numeraire": 'NMR'
+        };
+    }
 
     for (const id in priceData) {
         if (priceData.hasOwnProperty(id)) {
