@@ -48,6 +48,13 @@ const loginMessageElement = document.getElementById('loginMessage');
 const switchToLoginLink = document.getElementById('switchToLogin');
 const switchToRegisterLink = document.getElementById('switchToRegister');
 
+// Price Ticker Elements
+const tickerMoveElement = document.querySelector('.ticker-move');
+const tickerPlayPauseButton = document.getElementById('tickerPlayPause');
+const tickerPauseIcon = document.getElementById('tickerPauseIcon');
+const tickerPlayIcon = document.getElementById('tickerPlayIcon');
+let isTickerPaused = false;
+
 const GNEWS_API_KEY = process.env.GNEWS_API_KEY; // USER PROVIDED API KEY
 
 let currentPasteData = null; // To store the currently displayed paste data for download
@@ -422,8 +429,8 @@ async function fetchAINews(apiKey) {
         return;
     }
 
-    const query = 'AI OR "Artificial Intelligence"';
-    const url = `https://gnews.io/api/v4/search?q=${encodeURIComponent(query)}&lang=en&max=3&apikey=${apiKey}`;
+    const query = '("Artificial Intelligence" OR "AI development" OR "AI ethics") OR ("cryptocurrency news" OR "bitcoin news" OR "ethereum news" OR "blockchain developments" OR "crypto regulation" OR "NFT news")';
+    const url = `https://gnews.io/api/v4/search?q=${encodeURIComponent(query)}&lang=en&max=3&topic=technology,business,world&sortby=relevance&apikey=${apiKey}`;
 
     try {
         const response = await fetch(url);
@@ -536,6 +543,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       if (matrixCanvasElement) matrixCanvasElement.style.display = 'none';
     }
+    fetchCryptoPrices(); // Fetch initial crypto prices
+    setInterval(fetchCryptoPrices, 300000); // Refresh crypto prices every 5 minutes
 });
 
 // Also update the header link to act like "create new paste"
@@ -718,4 +727,81 @@ if (switchToRegisterLink) {
         e.preventDefault();
         showView('register');
     });
+}
+
+// Price Ticker Event Listener
+if (tickerPlayPauseButton) {
+    tickerPlayPauseButton.addEventListener('click', toggleTickerAnimation);
+}
+
+async function fetchCryptoPrices() {
+    if (!tickerMoveElement) return;
+
+    const coinIds = 'bitcoin,ethereum,solana,cardano,dogecoin,ripple,binancecoin';
+    const vsCurrency = 'usd';
+    const apiUrl = `https://api.coingecko.com/api/v3/simple/price?ids=${coinIds}&vs_currencies=${vsCurrency}&include_24hr_change=true`;
+
+    try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            throw new Error(`CoinGecko API error: ${response.status}`);
+        }
+        const data = await response.json();
+        populateTicker(data);
+    } catch (error) {
+        console.error('Error fetching crypto prices:', error);
+        tickerMoveElement.innerHTML = '<div class="ticker-item">Error loading prices.</div>';
+    }
+}
+
+function populateTicker(priceData) {
+    if (!tickerMoveElement) return;
+    tickerMoveElement.innerHTML = ''; // Clear old prices
+
+    const symbols = {
+        bitcoin: 'BTC', ethereum: 'ETH', solana: 'SOL', cardano: 'ADA', 
+        dogecoin: 'DOGE', ripple: 'XRP', binancecoin: 'BNB'
+    };
+
+    for (const id in priceData) {
+        if (priceData.hasOwnProperty(id)) {
+            const coin = priceData[id];
+            const symbol = symbols[id] || id.toUpperCase();
+            const price = coin.usd.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            const change = coin.usd_24h_change;
+            const changeClass = change >= 0 ? 'positive' : 'negative';
+            const changeFormatted = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+
+            const itemDiv = document.createElement('div');
+            itemDiv.classList.add('ticker-item');
+            itemDiv.innerHTML = `
+                <span class="coin-symbol">${symbol}:</span>
+                <span class="coin-price">${price}</span>
+                <span class="coin-change ${changeClass}">(${changeFormatted})</span>
+            `;
+            tickerMoveElement.appendChild(itemDiv);
+        }
+    }
+    // Duplicate items for seamless scrolling effect if content is not wide enough
+    // This simple duplication might need adjustment based on number of items and screen width
+    if (tickerMoveElement.children.length > 0 && tickerMoveElement.offsetWidth < tickerMoveElement.parentElement.offsetWidth * 2) {
+        const originalItems = tickerMoveElement.innerHTML;
+        tickerMoveElement.innerHTML += originalItems; // Duplicate for smoother scroll
+    }
+}
+
+function toggleTickerAnimation() {
+    if (!tickerMoveElement) return;
+    if (isTickerPaused) {
+        tickerMoveElement.style.animationPlayState = 'running';
+        tickerPauseIcon.style.display = 'inline';
+        tickerPlayIcon.style.display = 'none';
+        tickerPlayPauseButton.setAttribute('aria-label', 'Pause Ticker');
+    } else {
+        tickerMoveElement.style.animationPlayState = 'paused';
+        tickerPauseIcon.style.display = 'none';
+        tickerPlayIcon.style.display = 'inline';
+        tickerPlayPauseButton.setAttribute('aria-label', 'Play Ticker');
+    }
+    isTickerPaused = !isTickerPaused;
 }

@@ -377,6 +377,89 @@ button:active {
 
 /* End Auth Forms Styling */
 
+/* Price Ticker Styling */
+.price-ticker-container {
+  background-color: var(--theme-container-bg, #1f1f1f);
+  color: var(--theme-text, #fff);
+  padding: 5px 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden; /* Crucial for ticker effect */
+  border-bottom: 1px solid var(--theme-border, #333);
+  white-space: nowrap; /* Prevent items from wrapping */
+}
+
+.ticker-wrap {
+  flex-grow: 1;
+  overflow: hidden; /* Hide the overflowing content */
+}
+
+.ticker-move {
+  display: inline-block; /* Allows animation */
+  padding-left: 100%; /* Start with items off-screen to the right */
+  animation: ticker-scroll 30s linear infinite;
+  /* animation-play-state: running; by default */
+}
+
+.ticker-item {
+  display: inline-block;
+  padding: 0 1.5rem; /* Space between items */
+  font-size: 0.85em;
+}
+
+.ticker-item .coin-symbol {
+  font-weight: bold;
+  color: var(--theme-link, #6CB6FF); /* Use link color for emphasis */
+}
+
+.ticker-item .coin-price {
+  margin-left: 5px;
+}
+
+.ticker-item .coin-change {
+  margin-left: 5px;
+  font-size: 0.9em;
+}
+
+.ticker-item .positive {
+  color: #4CAF50; /* Green for positive change */
+}
+
+.ticker-item .negative {
+  color: #F44336; /* Red for negative change */
+}
+
+.ticker-controls {
+  padding: 0 10px;
+}
+
+.ticker-controls button {
+  background: transparent;
+  border: none;
+  color: var(--theme-text, #fff);
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ticker-controls button svg {
+  width: 16px;
+  height: 16px;
+}
+
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%); /* Move items from right to left */
+  }
+}
+
+/* End Price Ticker Styling */
+
 /* Not found message styling */
 .not-found {
   margin: 40px auto;
