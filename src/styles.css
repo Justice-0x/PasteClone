@@ -510,8 +510,8 @@ button#createNewPasteLinkBtn:hover {
 }
 
 .sidebar p {
-  font-size: 0.9rem;
-  color: var(--yankee-gray);
+  margin-bottom: 10px;
+  font-size: 0.9em;
 }
 
 footer {
@@ -557,4 +557,35 @@ footer {
     width: 100%;
     box-sizing: border-box; /* Ensure padding doesn't make it overflow */
   }
+}
+
+/* AI News Container Styling */
+#aiNewsContainer {
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid var(--yankee-gray);
+}
+
+.ai-news-item {
+  margin-bottom: 15px;
+}
+
+.ai-news-item h5 {
+  margin: 0 0 5px 0;
+  font-size: 1em;
+}
+
+.ai-news-item h5 a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+.ai-news-item h5 a:hover {
+  text-decoration: underline;
+}
+
+.ai-news-item p {
+  font-size: 0.85em;
+  margin: 0;
+  color: var(--yankee-gray); /* Lighter text for description */
 }

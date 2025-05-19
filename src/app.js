@@ -25,6 +25,9 @@ const shareLinkElement = document.getElementById('shareLink');
 const copyLinkBtnElement = document.getElementById('copyLinkBtn');
 const createNewPasteLinkBtnElement = document.getElementById('createNewPasteLinkBtn');
 const recentPastesListElement = document.getElementById('recentPastesList');
+const aiNewsContainerElement = document.getElementById('aiNewsContainer');
+
+const GNEWS_API_KEY = 'af40488155eaf6efee4246d45bc58de4'; // <<< REPLACE WITH YOUR ACTUAL API KEY
 
 // Generate a random ID for pastes
 function generatePasteId() {
@@ -209,6 +212,58 @@ function handleUrlOrNavigation() {
     loadRecentPastes();
 }
 
+async function fetchAINews(apiKey) {
+    if (!aiNewsContainerElement) return;
+    if (!apiKey || apiKey === 'YOUR_API_KEY') {
+        aiNewsContainerElement.innerHTML = '<p>AI News API key not configured.</p>';
+        return;
+    }
+
+    const query = 'AI OR "Artificial Intelligence"';
+    const url = `https://gnews.io/api/v4/search?q=${encodeURIComponent(query)}&lang=en&max=3&apikey=${apiKey}`;
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            if (response.status === 401) {
+                throw new Error('GNews API key is invalid.');
+            }
+            if (response.status === 403) {
+                throw new Error('GNews API daily quota reached or key forbidden.');
+            }
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        if (data.articles && data.articles.length > 0) {
+            aiNewsContainerElement.innerHTML = ''; // Clear loading/previous message
+            data.articles.forEach(article => {
+                const articleElement = document.createElement('div');
+                articleElement.className = 'ai-news-item';
+
+                const titleElement = document.createElement('h5');
+                const linkElement = document.createElement('a');
+                linkElement.href = article.url;
+                linkElement.textContent = article.title;
+                linkElement.target = '_blank'; // Open in new tab
+                titleElement.appendChild(linkElement);
+
+                const descriptionElement = document.createElement('p');
+                descriptionElement.textContent = article.description;
+
+                articleElement.appendChild(titleElement);
+                articleElement.appendChild(descriptionElement);
+                aiNewsContainerElement.appendChild(articleElement);
+            });
+        } else {
+            aiNewsContainerElement.innerHTML = '<p>No AI news articles found currently.</p>';
+        }
+    } catch (error) {
+        console.error('Error fetching AI news:', error);
+        aiNewsContainerElement.innerHTML = `<p>Error loading AI news: ${error.message}</p>`;
+    }
+}
+
 // Listen for popstate events (back/forward browser buttons)
 window.addEventListener('popstate', (event) => {
     handleUrlOrNavigation();
@@ -217,6 +272,8 @@ window.addEventListener('popstate', (event) => {
 // Initial page load
 document.addEventListener('DOMContentLoaded', () => {
     handleUrlOrNavigation();
+    fetchAINews(GNEWS_API_KEY);
+    setInterval(() => fetchAINews(GNEWS_API_KEY), 3600000); // Refresh every hour
 });
 
 // Also update the header link to act like "create new paste"
