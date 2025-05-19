@@ -27,12 +27,91 @@ const createNewPasteLinkBtnElement = document.getElementById('createNewPasteLink
 const recentPastesListElement = document.getElementById('recentPastesList');
 const aiNewsContainerElement = document.getElementById('aiNewsContainer');
 const themeSelectorElement = document.getElementById('themeSelector');
+const matrixCanvasElement = document.getElementById('matrixCanvas');
 
 const GNEWS_API_KEY = 'af40488155eaf6efee4246d45bc58de4'; // USER PROVIDED API KEY
 
+// Matrix Effect Variables
+let matrixCtx;
+let matrixAnimationId = null;
+const matrixChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}";
+const matrixFontSize = 12;
+let matrixColumns;
+let matrixDrops;
+
+function initializeMatrix() {
+    if (!matrixCanvasElement) return;
+    matrixCtx = matrixCanvasElement.getContext('2d');
+    matrixCanvasElement.width = matrixCanvasElement.offsetWidth;
+    matrixCanvasElement.height = matrixCanvasElement.offsetHeight;
+
+    matrixColumns = Math.floor(matrixCanvasElement.width / matrixFontSize);
+    matrixDrops = [];
+    for (let x = 0; x < matrixColumns; x++) {
+        matrixDrops[x] = 1;
+    }
+}
+
+function drawMatrix() {
+    if (!matrixCtx || !matrixCanvasElement || matrixCanvasElement.style.display === 'none') {
+      if (matrixAnimationId) cancelAnimationFrame(matrixAnimationId);
+      matrixAnimationId = null;
+      return;
+    }
+
+    matrixCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    matrixCtx.fillRect(0, 0, matrixCanvasElement.width, matrixCanvasElement.height);
+
+    matrixCtx.fillStyle = '#0F0'; // Green characters
+    matrixCtx.font = matrixFontSize + 'px arial';
+
+    for (let i = 0; i < matrixDrops.length; i++) {
+        const text = matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));
+        matrixCtx.fillText(text, i * matrixFontSize, matrixDrops[i] * matrixFontSize);
+
+        if (matrixDrops[i] * matrixFontSize > matrixCanvasElement.height && Math.random() > 0.975) {
+            matrixDrops[i] = 0;
+        }
+        matrixDrops[i]++;
+    }
+    matrixAnimationId = requestAnimationFrame(drawMatrix);
+}
+
+function startMatrix() {
+  if (!matrixCanvasElement || !matrixCtx) initializeMatrix();
+  if (matrixCanvasElement && matrixCtx) {
+    matrixCanvasElement.style.display = 'block';
+    if (matrixCanvasElement.width !== matrixCanvasElement.offsetWidth || matrixCanvasElement.height !== matrixCanvasElement.offsetHeight) {
+        // Responsive canvas resize if container size changed
+        matrixCanvasElement.width = matrixCanvasElement.offsetWidth;
+        matrixCanvasElement.height = matrixCanvasElement.offsetHeight;
+        matrixColumns = Math.floor(matrixCanvasElement.width / matrixFontSize);
+        matrixDrops = [];
+        for (let x = 0; x < matrixColumns; x++) {
+            matrixDrops[x] = 1 + Math.floor(Math.random() * (matrixCanvasElement.height / matrixFontSize));
+        }
+    }
+    if (!matrixAnimationId) {
+      matrixAnimationId = requestAnimationFrame(drawMatrix);
+    }
+  }
+}
+
+function stopMatrix() {
+  if (matrixAnimationId) {
+    cancelAnimationFrame(matrixAnimationId);
+    matrixAnimationId = null;
+  }
+  if (matrixCanvasElement && matrixCtx) {
+    // Optionally clear the canvas when stopping
+    // matrixCtx.clearRect(0, 0, matrixCanvasElement.width, matrixCanvasElement.height);
+    matrixCanvasElement.style.display = 'none';
+  }
+}
+
 // Theme handling
 function applyTheme(themeName) {
-    document.body.classList.remove('theme-dark', 'theme-spooky');
+    document.body.classList.remove('theme-dark', 'theme-spooky', 'theme-win95');
     if (themeName) {
         document.body.classList.add(`theme-${themeName}`);
     }
@@ -69,7 +148,7 @@ function copyToClipboard(text, buttonElement) {
         }, 2000);
     }).catch(err => {
         console.error('Failed to copy: ', err);
-        alert('Failed to copy to clipboard');
+        alert('Whoops! Couldn\'t snag that link.');
     });
 }
 
@@ -86,13 +165,15 @@ function showPasteInputArea() {
     if (burnAfterReadElement) burnAfterReadElement.checked = false;
 
     window.history.pushState({}, '', window.location.pathname); // Clear URL params
+    startMatrix();
 }
 
 function showPasteDisplayArea(pasteData) {
     pasteInputAreaElement.style.display = 'none';
     pasteDisplayAreaElement.style.display = 'block';
+    stopMatrix();
 
-    displayTitleElement.textContent = pasteData.title || 'Untitled Paste';
+    displayTitleElement.textContent = pasteData.title || 'MyGuy\'s Fresh Drop';
     
     // Clear previous content and classes from pasteOutputElement
     pasteOutputElement.innerHTML = '';
@@ -162,7 +243,7 @@ if (createPasteBtnElement) {
     createPasteBtnElement.addEventListener('click', async () => {
         const content = pasteInputElement.value;
         if (!content.trim()) {
-            alert('Please enter some text to paste.');
+            alert('Yo, drop some text first!');
             return;
         }
 
@@ -170,7 +251,7 @@ if (createPasteBtnElement) {
         const pasteData = {
             id: pasteId,
             content: content,
-            title: pasteTitleElement.value || 'Untitled',
+            title: pasteTitleElement.value || 'MyGuy\'s Fresh Drop',
             expiration: pasteExpirationElement.value,
             syntax: syntaxHighlightingElement.value,
             exposure: pasteExposureElement.value,
@@ -185,10 +266,10 @@ if (createPasteBtnElement) {
             showPasteDisplayArea(pasteData);
             loadRecentPastes(); // Refresh recent pastes list
             // Update URL to reflect the paste ID without causing a page reload
-            window.history.pushState(pasteData, pasteData.title || 'Yankee Paste', `${window.location.pathname}?paste=${pasteId}`);
+            window.history.pushState(pasteData, pasteData.title || 'MyGuy Paste', `${window.location.pathname}?paste=${pasteId}`);
         } catch (error) {
             console.error('Error saving paste:', error);
-            alert('Error saving paste. LocalStorage might be full or unavailable.');
+            alert('My bad! Couldn\'t save this drop. LocalStorage might be packed.');
         }
     });
 }
@@ -198,7 +279,7 @@ if (copyLinkBtnElement) {
         if (shareLinkElement.href && shareLinkElement.href !== '#') {
             copyToClipboard(shareLinkElement.href, copyLinkBtnElement);
         } else {
-            alert('No link to copy!');
+            alert('Nothin\' to snag here!');
         }
     });
 }
@@ -223,11 +304,11 @@ function handleUrlOrNavigation() {
                 showPasteDisplayArea(pasteData);
             } catch (e) {
                 console.error("Error parsing paste data from localStorage", e);
-                alert("Could not load paste. Data might be corrupted.");
+                alert("This drop\'s data is lookin\' sus. Can\'t load it.");
                 showPasteInputArea();
             }
         } else {
-            alert('Paste not found or expired.');
+            alert('Can\'t find that drop, G. Maybe it ghosted?');
             showPasteInputArea(); // Show input area if paste not found
         }
     } else {
@@ -299,11 +380,18 @@ document.addEventListener('DOMContentLoaded', () => {
     handleUrlOrNavigation();
     fetchAINews(GNEWS_API_KEY);
     setInterval(() => fetchAINews(GNEWS_API_KEY), 3600000); // Refresh every hour
+    // Initialize matrix here for the first load if input area is shown by default
+    if (pasteInputAreaElement && pasteInputAreaElement.style.display !== 'none') {
+      initializeMatrix(); // Initialize once
+      // startMatrix(); // Don't auto-start here, showPasteInputArea will handle it
+    } else {
+      if (matrixCanvasElement) matrixCanvasElement.style.display = 'none';
+    }
 });
 
 // Also update the header link to act like "create new paste"
 const headerNewPasteLink = document.querySelector('header nav a');
-if(headerNewPasteLink && headerNewPasteLink.textContent.includes("Create New Paste")) {
+if(headerNewPasteLink && headerNewPasteLink.textContent.includes("Drop a New Paste")) {
     headerNewPasteLink.addEventListener('click', (e) => {
         e.preventDefault();
         showPasteInputArea();

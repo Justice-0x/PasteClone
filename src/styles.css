@@ -39,8 +39,27 @@ body.theme-spooky {
   --theme-sidebar-text: #AAAAAA; /* Medium gray for sidebar text */
 }
 
+body.theme-win95 {
+  /* Windows 95 Theme Variables */
+  --theme-bg: #C0C0C0;                     /* Classic W95 Gray */
+  --theme-text: #000000;                   /* Black */
+  --theme-container-bg: #C0C0C0;           /* Same gray for containers initially */
+  --theme-border: #808080;                 /* Darker Gray for borders */
+  --theme-button-bg: #C0C0C0;              /* Button face gray */
+  --theme-button-text: #000000;            /* Black button text */
+  --theme-input-bg: #FFFFFF;               /* White input background */
+  --theme-input-text: #000000;             /* Black input text */
+  --theme-link: #0000FF;                   /* Standard Blue link */
+  --theme-sidebar-text: #000000;
+  --theme-header-bg: #000080;              /* Navy Blue for "title bars" */
+  --theme-header-text: #FFFFFF;            /* White text on title bars */
+
+  /* Specific W95 font - system-ui is a good modern fallback, then Arial */
+  font-family: 'MS Sans Serif', 'Tahoma', 'Geneva', 'system-ui', 'Arial', sans-serif;
+}
+
 body {
-  font-family: 'Arial', sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", sans-serif;
   margin: 0;
   padding: 0;
   background-color: var(--theme-bg);
@@ -351,11 +370,19 @@ header h1 {
   font-size: 1.8rem;
 }
 
+body.theme-win95 header h1 {
+  color: var(--theme-header-text); /* White text for W95 header */
+}
+
 header nav a {
   color: var(--theme-link);
   text-decoration: none;
   margin-left: 1rem;
   font-size: 1rem;
+}
+
+body.theme-win95 header nav a {
+  color: var(--theme-header-text); /* White links in W95 header */
 }
 
 header nav a:hover {
@@ -376,6 +403,12 @@ main {
   border: 1px solid var(--theme-border);
 }
 
+body.theme-win95 .paste-container,
+body.theme-win95 .sidebar {
+  border: 2px outset #FFFFFF; /* Classic 3D border */
+  box-shadow: 1px 1px 0px 0px #000000, inset 1px 1px 0px 0px #808080;
+}
+
 .paste-input-area h2,
 .paste-display-area h2 {
   margin-top: 0;
@@ -383,6 +416,19 @@ main {
   border-bottom: 1px solid var(--theme-border);
   padding-bottom: 0.5rem;
   margin-bottom: 1rem;
+}
+
+body.theme-win95 .paste-input-area h2,
+body.theme-win95 .paste-display-area h2,
+body.theme-win95 .sidebar h4 {
+  background-color: var(--theme-header-bg);
+  color: var(--theme-header-text);
+  padding: 3px 5px;
+  margin-top: 0; /* Reset margin for these title bars */
+  margin-left: -2px; /* Adjust to align with border */
+  margin-right: -2px; /* Adjust to align with border */
+  border-bottom: 1px solid #000000;
+  font-size: 0.9rem;
 }
 
 textarea#pasteInput {
@@ -397,6 +443,17 @@ textarea#pasteInput {
   font-size: 0.95rem;
   margin-bottom: 1rem;
   box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
+}
+
+body.theme-win95 textarea#pasteInput,
+body.theme-win95 .paste-options select,
+body.theme-win95 .paste-options input[type="text"],
+body.theme-win95 .paste-options input[type="password"] {
+  border: 1px solid #000000;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #FFFFFF;
+  font-family: 'MS Sans Serif', 'Tahoma', 'Geneva', 'system-ui', 'Arial', sans-serif;
 }
 
 .paste-options {
@@ -468,6 +525,36 @@ button#createNewPasteLinkBtn {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+body.theme-win95 button,
+body.theme-win95 button#createPasteBtn,
+body.theme-win95 button#copyLinkBtn,
+body.theme-win95 button#createNewPasteLinkBtn {
+  border: 1px solid #000000;
+  border-top-color: #FFFFFF;
+  border-left-color: #FFFFFF;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  box-shadow: 1px 1px 0px 0px #000000;
+  background-color: var(--theme-button-bg);
+  color: var(--theme-button-text);
+  padding: 5px 10px; /* W95 buttons are typically smaller */
+  font-size: 0.9rem;
+  border-radius: 0; /* No rounded corners */
+  font-family: 'MS Sans Serif', 'Tahoma', 'Geneva', 'system-ui', 'Arial', sans-serif;
+}
+
+body.theme-win95 button:active,
+body.theme-win95 button#createPasteBtn:active,
+body.theme-win95 button#copyLinkBtn:active,
+body.theme-win95 button#createNewPasteLinkBtn:active {
+  border-top-color: #808080;
+  border-left-color: #808080;
+  border-right-color: #FFFFFF;
+  border-bottom-color: #FFFFFF;
+  box-shadow: none;
+  transform: none; /* No translate for W95 buttons */
+}
+
 button#createPasteBtn:hover,
 button#copyLinkBtn:hover,
 button#createNewPasteLinkBtn:hover {
@@ -489,6 +576,36 @@ button#createNewPasteLinkBtn:hover {
   font-family: 'Courier New', Courier, monospace;
 }
 
+body.theme-win95 .paste-display-area pre#pasteOutput {
+  background-color: var(--theme-input-bg);
+  color: var(--theme-input-text);
+  overflow-y: auto;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+body.theme-win95 .paste-display-area div#pasteOutput {
+  background-color: var(--theme-input-bg);
+  color: var(--theme-input-text);
+  border: 1px solid #000000;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #FFFFFF;
+  font-family: 'MS Sans Serif', 'Tahoma', 'Geneva', 'system-ui', 'Arial', sans-serif; /* Use system font for text display in W95 */
+  padding: 5px;
+}
+
+/* Ensure Markdown code blocks in W95 theme also get W95 styling */
+body.theme-win95 .paste-display-area div#pasteOutput pre {
+  background-color: var(--theme-input-bg) !important; /* Override Prism's default if necessary */
+  color: var(--theme-input-text) !important;
+  border: 1px solid #808080;
+  padding: 5px;
+}
+
+body.theme-win95 .paste-display-area div#pasteOutput pre code {
+  font-family: 'Courier New', Courier, monospace !important; /* Keep code monospaced */
+}
+
 .paste-display-area #shareLink {
   color: var(--theme-link);
   word-break: break-all;
@@ -507,6 +624,11 @@ button#createNewPasteLinkBtn:hover {
   border-radius: 8px;
   border: 1px solid var(--theme-border);
   min-height: 300px; /* Give sidebar some min height */
+}
+
+body.theme-win95 .sidebar {
+  border: 2px outset #FFFFFF; /* Classic 3D border */
+  box-shadow: 1px 1px 0px 0px #000000, inset 1px 1px 0px 0px #808080;
 }
 
 .sidebar h4 {
@@ -614,4 +736,53 @@ footer {
   font-size: 0.85em;
   margin: 0;
   color: var(--theme-sidebar-text);
+}
+
+body.theme-win95 .ai-news-item h5 a {
+  color: var(--theme-link);
+}
+
+body.theme-win95 .sidebar ul li a {
+  color: var(--theme-link);
+}
+
+/* Matrix Canvas Styling */
+.paste-input-area {
+  position: relative; /* Needed for absolute positioning of the canvas */
+}
+
+#matrixCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* Behind other direct children of paste-input-area */
+  display: none; /* Initially hidden, JS will show it */
+}
+
+/* Ensure textarea is above the canvas */
+.paste-input-area textarea#pasteInput,
+.paste-input-area .paste-options,
+.paste-input-area h2 /* Add this if h2 should also be above */
+{
+  position: relative;
+  z-index: 1;
+}
+
+/* ASCII Logo Styling */
+#asciiLogo {
+  font-family: 'Courier New', Courier, monospace;
+  color: var(--theme-text); /* Use theme text color */
+  font-size: 6px; /* Adjust this to scale the logo appropriately */
+  line-height: 0.7; /* Adjust for tighter lines if needed */
+  white-space: pre;
+  margin: 0 auto; /* Center it if header becomes flex column */
+  text-align: center; /* Center the text within the pre block */
+  padding: 0.5rem 0; /* Some vertical padding */
+}
+
+body.theme-win95 #asciiLogo {
+  color: var(--theme-header-text); /* Match W95 header text color */
+  font-family: 'Fixedsys', 'Terminal', 'Courier New', Courier, monospace; /* Classic monospaced for W95 */
 }

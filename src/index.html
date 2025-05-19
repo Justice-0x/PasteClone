@@ -4,18 +4,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yankee Paste</title>
+  <title>MyGuy Paste</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
   <header>
-    <h1>Yankee Paste</h1>
+    <pre id="asciiLogo">
+  /**\\
+ /** \\
+/**   \\
+**     \\
+**      \\ /\ / / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ /     /**
+**      /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ /    **
+**     /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ /     **
+**    /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /     **
+**    **     **     **     **     **     **     **     **     **     **     **     **     **     **     **     **     **     **     **    **
+**    **     _________________      _______________________________      _________________                           **    **
+**    **    /                /|    /                              /|    /                /|                           **    **
+**    **   /                / |   /                              / |   /                / |                           **    **
+**    **  /    ____________/ /|  /    _________________________/ /|  /    ____________/ /|                           **    **
+**    ** /    /|___________/ /  /    /|________________________/ / /    /|___________/ /                            **    **
+**    ** |    ||           | /  |    ||                        | / |    ||           | /                             **    **
+**    ** |    ||    _______|/   |    ||     ___________________|/  |    ||    _______|/                              **    **
+**    ** |    ||   /           |    ||    /|                    |    ||   /                                          **    **
+**    ** |    ||  /_______     |    ||   / |___________________ |    ||  /_______                                      **    **
+**    ** |    ||          |    |    ||  /____________________ /||    ||          |                                     **    **
+**    ** |    ||__________|\   |    ||_______________________/ ||    ||__________|\                                    **    **
+**    ** |    |/___________/   |    |/_______________________/ /|    |/___________/                                    **    **
+**    ** |                    ||                              | /|                   |                                    **    **
+**    ** |____________________|/    |_____________________________/ |____________________|/                                    **    **
+**    **                                                                                                                   **    **
+**    **                                                                                                                   **    **
+**    **      /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \ / /\ \       **    **
+**    **     /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ / / /**\ /      **    **
+**     \ /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ / /** \ /       **
+**      \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /**   \ /       **
+**       \ /     \ /     \ /     \ /     \ /     \ /     \ /     \ /     \ /     \ /     \ /     \ /     \ /     \ /     \ /     \ /     \ /     \ /        **
+**                                                                                                                                      **
+ **                                                                                                                                    **
+  \\                                                                                                                                    //
+   \\                                                                                                                                  //
+    \\                                                                                                                                //
+    </pre>
     <nav>
-      <a href="#">Create New Paste</a>
+      <a href="#">Drop a New Paste</a>
       <select id="themeSelector" aria-label="Select theme">
         <option value="dark">Dark Theme</option>
         <option value="spooky">Spooky Theme</option>
+        <option value="win95">Windows 95</option>
       </select>
     </nav>
   </header>
@@ -23,7 +60,8 @@
   <main>
     <div class="paste-container">
       <div class="paste-input-area">
-        <h2>New Paste</h2>
+        <canvas id="matrixCanvas"></canvas>
+        <h2>Fresh Paste Zone</h2>
         <textarea id="pasteInput" placeholder="Paste your text here..."></textarea>
         
         <div class="paste-options">
@@ -85,20 +123,20 @@
             <label for="burnAfterRead" class="inline-label">Burn after read (Future feature)</label>
           </div>
 
-          <label for="pasteTitle">Optional Paste Title:</label>
+          <label for="pasteTitle">Title it (optional, fam):</label>
           <input type="text" id="pasteTitle" placeholder="Enter a title (optional)">
 
-          <button id="createPasteBtn">Create Paste</button>
+          <button id="createPasteBtn">Make it Stick!</button>
         </div>
       </div>
 
       <div class="paste-display-area" style="display: none;">
-        <h2>View Paste</h2>
+        <h2>Peep This Paste</h2>
         <h3 id="displayTitle"></h3>
         <div id="pasteOutput"></div>
-        <p>Share this link: <a id="shareLink" href="#" target="_blank"></a></p>
-        <button id="copyLinkBtn">Copy Link</button>
-        <button id="createNewPasteLinkBtn">Create New Paste</button>
+        <p>Share this Drip: <a id="shareLink" href="#" target="_blank"></a></p>
+        <button id="copyLinkBtn">Snag Link</button>
+        <button id="createNewPasteLinkBtn">Drop Another One</button>
       </div>
     </div>
 
