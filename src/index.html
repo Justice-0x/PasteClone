@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyGuy Paste</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="price-ticker-container">
+    <div class="ticker-wrap">
+        <div class="ticker-move">
+            <!-- Crypto prices will be injected here by JavaScript -->
+        </div>
+    </div>
+    <div class="ticker-controls">
+        <select id="tokenTypeSelector" aria-label="Select token type">
+            <option value="top25crypto" selected>Top 25 Crypto</option>
+            <option value="aiTokens">Top AI Tokens</option>
+        </select>
+        <button id="tickerPlayPause" aria-label="Pause Ticker">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pause-fill" viewBox="0 0 16 16" id="tickerPauseIcon">
+                <path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"/>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play-fill" viewBox="0 0 16 16" id="tickerPlayIcon" style="display: none;">
+                <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+            </svg>
+        </button>
+    </div>
+  </div>
+
+  <header>
+    <pre id="asciiLogo">
+'   __       __             ______
+'  /  \     /  |           /      \
+'  $$  \   /$$ | __    __ /$$$$$$  | __    __  __    __
+'  $$$  \ /$$$ |/  |  /  |$$ | _$$/ /  |  /  |/  |  /  |
+'  $$$$  /$$$$ |$$ |  $$ |$$ |/    |$$ |  $$ |$$ |  $$ |
+'  $$ $$ $$/$$ |$$ |  $$ |$$ |$$$$ |$$ |  $$ |$$ |  $$ |
+'  $$ |$$$/ $$ |$$ \__$$ |$$ \__$$ |$$ \__$$ |$$ \__$$ |
+'  $$ | $/  $$ |$$    $$ |$$    $$/ $$    $$/ $$    $$ |
+'  $$/      $$/  $$$$$$$ | $$$$$$/   $$$$$$/   $$$$$$$ |
+'               /  \__$$ |                    /  \__$$ |
+'               $$    $$/                     $$    $$/
+'                $$$$$$/                       $$$$$$/
+    </pre>
+    <nav>
+      <a href="#" id="navDropNewPaste">Drop a New Paste</a>
+      <a href="/matrix-share/" id="navMatrixShare" class="matrix-nav-link">🔐 MATRIX Share</a>
+      <a href="#" id="navLogin" style="display: inline;">Login</a>
+      <a href="#" id="navRegister" style="display: inline;">Register</a>
+      <span id="userStatus" style="display: none; margin-left: 10px;"></span>
+      <a href="#" id="navLogout" style="display: none; margin-left: 10px;">Logout</a>
+      <select id="themeSelector" aria-label="Select theme">
+        <option value="dark">Dark Theme</option>
+        <option value="spooky">Spooky Theme</option>
+        <option value="win95">Windows 95</option>
+      </select>
+    </nav>
+  </header>
+
+  <main>
+    <div id="authFormsContainer" class="auth-forms-container">
+      <!-- Registration Form -->
+      <div id="registerFormContainer" class="form-container" style="display:none;">
+        <h2>Register New Account</h2>
+        <form id="registerForm">
+          <div>
+            <label for="registerUsername">Username:</label>
+            <input type="text" id="registerUsername" name="username" required>
+          </div>
+          <div>
+            <label for="registerEmail">Email:</label>
+            <input type="email" id="registerEmail" name="email" required>
+          </div>
+          <div>
+            <label for="registerPassword">Password:</label>
+            <input type="password" id="registerPassword" name="password" required minlength="6">
+          </div>
+          <button type="submit">Register</button>
+          <p class="auth-switch">Already have an account? <a href="#" id="switchToLogin">Login here</a></p>
+        </form>
+        <div id="registerMessage" class="auth-message"></div>
+      </div>
+
+      <!-- Login Form -->
+      <div id="loginFormContainer" class="form-container" style="display:none;">
+        <h2>Login to MyGuy Paste</h2>
+        <form id="loginForm">
+          <div>
+            <label for="loginUsername">Username:</label>
+            <input type="text" id="loginUsername" name="username" required>
+          </div>
+          <div>
+            <label for="loginPassword">Password:</label>
+            <input type="password" id="loginPassword" name="password" required>
+          </div>
+          <button type="submit">Login</button>
+          <p class="auth-switch">Don't have an account? <a href="#" id="switchToRegister">Register here</a></p>
+        </form>
+        <div id="loginMessage" class="auth-message"></div>
+      </div>
+    </div>
+
+    <div class="paste-container">
+      <div class="paste-input-area">
+        <canvas id="matrixCanvas"></canvas>
+        <h2>Fresh Paste Zone</h2>
+        <textarea id="pasteInput" placeholder="Paste your text here..."></textarea>
+
+        <div class="paste-options">
+          <h3>Paste Settings</h3>
+
+          <label for="syntaxHighlighting">Syntax Highlighting:</label>
+          <select id="syntaxHighlighting">
+            <option value="none" selected>None</option>
+            <option value="text">Plain Text</option>
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="csharp">C#</option>
+            <option value="php">PHP</option>
+            <option value="cpp">C++</option>
+            <option value="ruby">Ruby</option>
+            <option value="go">Go</option>
+            <option value="html">HTML</option>
+            <option value="css">CSS</option>
+            <option value="xml">XML</option>
+            <option value="sql">SQL</option>
+            <option value="bash">Bash/Shell</option>
+            <option value="markdown">Markdown</option>
+            <!-- Add more common languages as needed -->
+          </select>
+
+          <label for="pasteExpiration">Expiration:</label>
+          <select id="pasteExpiration">
+            <option value="10m">10 Minutes</option>
+            <option value="1h">1 Hour</option>
+            <option value="1d" selected>1 Day</option>
+            <option value="1w">1 Week</option>
+            <option value="2w">2 Weeks</option>
+            <option value="1m">1 Month</option>
+            <option value="6m">6 Months</option>
+            <option value="1y">1 Year</option>
+            <option value="never">Never</option>
+          </select>
+          <p class="expiration-note">Default: Paste will expire in 24 hours unless another option is selected.</p>
+
+          <label for="pasteExposure">Paste Exposure:</label>
+          <select id="pasteExposure">
+            <option value="public" selected>Public</option>
+            <option value="unlisted">Unlisted</option>
+            <option value="private">Private (requires login - future feature)</option>
+          </select>
+
+          <label for="pasteFolder">Folder:</label>
+          <select id="pasteFolder">
+            <option value="none" selected>None</option>
+            <!-- Folder options would be dynamically populated if user is logged in -->
+          </select>
+
+          <label for="pastePassword">Password (Optional):</label>
+          <input type="password" id="pastePassword" placeholder="Protect with a password">
+
+          <div>
+            <input type="checkbox" id="burnAfterRead" name="burnAfterRead">
+            <label for="burnAfterRead" class="inline-label">Burn after read (Future feature)</label>
+          </div>
+
+          <label for="pasteCustomAlias">Custom URL Alias (optional, 3-50 chars, a-z, 0-9, -, _):</label>
+          <input type="text" id="pasteCustomAlias" placeholder="e.g., my-cool-notes">
+
+          <label for="pasteTitle">Title it (optional, fam):</label>
+          <input type="text" id="pasteTitle" placeholder="Enter a title (optional)">
+
+          <button id="createPasteBtn">Make it Stick!</button>
+        </div>
+      </div>
+
+      <div class="paste-display-area" style="display: none;">
+        <h2>Peep This Paste</h2>
+        <h3 id="displayTitle"></h3>
+        <div id="pasteOutput"></div>
+        <p>Share this Drip: <a id="shareLink" href="#" target="_blank"></a></p>
+        <p>View Raw: <a id="rawLink" href="#" target="_blank">Peep Raw</a></p>
+        <button id="copyLinkBtn">Snag Link</button>
+        <button id="createNewPasteLinkBtn">Drop Another One</button>
+        <button id="downloadPasteBtn">Snag File</button>
+      </div>
+    </div>
+
+    <aside class="sidebar">
+      <!-- Sidebar for ads, recent pastes, etc. like pastebin -->
+      <h4>Recent Pastes</h4>
+      <ul id="recentPastesList">
+        <!-- Populated by JS -->
+      </ul>
+
+      <h4>🔐 MATRIX Share</h4>
+      <div id="matrixSharePromo" class="matrix-promo">
+        <p>Need to share files securely? Try our new <strong>MyGuy-MATRIX-Share</strong> - end-to-end encrypted file sharing with that Matrix aesthetic, fam!</p>
+        <a href="/matrix-share/" class="matrix-link">Enter the MATRIX →</a>
+      </div>
+
+      <h4>AI News</h4>
+      <div id="aiNewsContainer">
+        <p>Loading AI news...</p>
+      </div>
+
+      <h4>Contact MyGuy</h4>
+      <p>Got feedback or a hot tip? <a href="#" id="contactMyGuyLink">Send a message!</a> (Psst! Login will be needed soon!)</p>
+
+      <h4>Advertise on MyGuy Paste</h4>
+      <p>Wanna show your cool stuff to our awesome users? <a href="mailto:sonny@myguy.wtf?subject=Advertising Inquiry - MyGuy Paste" id="advertiseLink">Slide into our DMs</a> for ad rates!</p>
+
+       <h4>Info</h4>
+      <p>Welcome to MyGuy Paste! Share your text and code snippets easily. Pastes are public by default.</p>
+      <p class="expiration-info-sidebar">Note: Pastes will expire in 24 hours unless a different duration is selected during creation.</p>
+    </aside>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 MyGuy</p>
+  </footer>
+
+  <script src="app.js" type="module"></script>
+
+<!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/682aa8916121ef190b570edc/1irja4tpi';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
+
+</body>
+
+</html>

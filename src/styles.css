@@ -1,0 +1,1127 @@
+/* styles.css */
+:root {
+  /* Default Dark Theme Variables (current Yankee theme) */
+  --theme-bg: #0C2340; /* yankee-navy */
+  --theme-text: #FFFFFF; /* yankee-white */
+  --theme-container-bg: #1E2D3B;
+  --theme-border: #C4CED3; /* yankee-gray */
+  --theme-button-bg: #C4CED3;
+  --theme-button-text: #0C2340;
+  --theme-input-bg: #F0F0F0; /* yankee-light-gray */
+  --theme-input-text: #0C2340;
+  --theme-link: #6CB6FF;
+  --theme-sidebar-text: #C4CED3; /* For .sidebar p and .ai-news-item p */
+
+  /* Matrix Theme Colors */
+  --matrix-green: #00ff41;
+  --matrix-green-dark: #00cc33;
+  --matrix-green-glow: rgba(0, 255, 65, 0.1);
+  --matrix-green-border: rgba(0, 255, 65, 0.3);
+}
+
+body.theme-dark {
+  --theme-bg: #0C2340;
+  --theme-text: #FFFFFF;
+  --theme-container-bg: #1E2D3B;
+  --theme-border: #C4CED3;
+  --theme-button-bg: #C4CED3;
+  --theme-button-text: #0C2340;
+  --theme-input-bg: #F0F0F0;
+  --theme-input-text: #0C2340;
+  --theme-link: #6CB6FF;
+  --theme-sidebar-text: #C4CED3;
+}
+
+body.theme-spooky {
+  --theme-bg: #1A1A1A;       /* Very dark gray/black */
+  --theme-text: #E0E0E0;     /* Light gray */
+  --theme-container-bg: #2C2C2C; /* Darker container */
+  --theme-border: #5D3FD3;   /* Purple for borders */
+  --theme-button-bg: #FF6600; /* Orange for buttons */
+  --theme-button-text: #1A1A1A;/* Black text on orange buttons */
+  --theme-input-bg: #333333;  /* Dark input bg */
+  --theme-input-text: #E0E0E0;/* Light gray input text */
+  --theme-link: #FF8C00;     /* Dark Orange for links */
+  --theme-sidebar-text: #AAAAAA; /* Medium gray for sidebar text */
+}
+
+body.theme-win95 {
+  /* Windows 95 Theme Variables */
+  --theme-bg: #C0C0C0;                     /* Classic W95 Gray */
+  --theme-text: #000000;                   /* Black */
+  --theme-container-bg: #C0C0C0;           /* Same gray for containers initially */
+  --theme-border: #808080;                 /* Darker Gray for borders */
+  --theme-button-bg: #C0C0C0;              /* Button face gray */
+  --theme-button-text: #000000;            /* Black button text */
+  --theme-input-bg: #FFFFFF;               /* White input background */
+  --theme-input-text: #000000;             /* Black input text */
+  --theme-link: #0000FF;                   /* Standard Blue link */
+  --theme-sidebar-text: #000000;
+  --theme-header-bg: #000080;              /* Navy Blue for "title bars" */
+  --theme-header-text: #FFFFFF;            /* White text on title bars */
+
+  /* Specific W95 font - system-ui is a good modern fallback, then Arial */
+  font-family: 'MS Sans Serif', 'Tahoma', 'Geneva', 'system-ui', 'Arial', sans-serif;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--theme-bg);
+  color: var(--theme-text);
+  line-height: 1.6;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Apply a different background in viewing mode */
+body.view-mode {
+  background-color: #f0f2f5;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  margin-bottom: 20px;
+  color: #333;
+  text-align: center;
+  font-size: 2.5rem;
+}
+
+textarea {
+  width: 100%;
+  height: 200px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  resize: vertical;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #4b3edf;
+  box-shadow: 0 2px 12px rgba(75, 62, 223, 0.15);
+}
+
+button {
+  background-color: #4b3edf;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: transform 0.2s, background-color 0.3s;
+  display: block;
+  margin: 0 auto;
+}
+
+button:hover {
+  background-color: #3730a3;
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+.hidden {
+  display: none;
+}
+
+#result {
+  margin-top: 30px;
+  padding: 25px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  animation: popIn 0.5s ease-out forwards;
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.success-icon {
+  font-size: 50px;
+  margin-bottom: 15px;
+  animation: bounce 1s ease infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+#result h2 {
+  color: #4b3edf;
+  margin: 0 0 15px 0;
+  font-size: 28px;
+}
+
+.link-container {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
+}
+
+#pasteLink {
+  color: #1890ff;
+  word-break: break-all;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 16px;
+  flex: 1;
+  text-align: left;
+  padding-right: 10px;
+}
+
+#pasteLink:hover {
+  text-decoration: underline;
+}
+
+.copy-btn {
+  background-color: #28a745;
+  padding: 8px 12px;
+  margin: 0;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.copy-btn:hover {
+  background-color: #218838;
+}
+
+/* Styling for the view result message */
+.view-result {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #e8f4fd;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.view-icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+.view-result h2 {
+  color: #2c5282;
+  margin: 0 0 15px 0;
+  font-size: 24px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.copy-content-btn {
+  background-color: #3182ce;
+  padding: 8px 15px;
+}
+
+.copy-content-btn:hover {
+  background-color: #2b6cb0;
+}
+
+/* Create New Paste button styling */
+#createNewContainer {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.new-paste-btn {
+  display: inline-block;
+  background-color: #4b3edf;
+  color: white;
+  text-decoration: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: transform 0.2s, background-color 0.3s, box-shadow 0.3s;
+  box-shadow: 0 4px 6px rgba(75, 62, 223, 0.2);
+}
+
+.new-paste-btn:hover {
+  background-color: #3730a3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(75, 62, 223, 0.25);
+}
+
+.new-paste-btn:active {
+  transform: translateY(0);
+}
+
+/* Matrix Share Navigation and Promo Styling */
+.matrix-nav-link {
+  background: linear-gradient(90deg, var(--matrix-green), var(--matrix-green-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: bold;
+  text-shadow: 0 0 10px var(--matrix-green);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.matrix-nav-link:hover {
+  text-shadow: 0 0 15px var(--matrix-green);
+  transform: scale(1.05);
+}
+
+.matrix-nav-link::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, var(--matrix-green), var(--matrix-green-dark));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+  border-radius: 4px;
+}
+
+.matrix-nav-link:hover::before {
+  opacity: 0.1;
+}
+
+/* Matrix Share Promo Section */
+.matrix-promo {
+  background: var(--matrix-green-glow);
+  border: 1px solid var(--matrix-green);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.matrix-promo::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    var(--matrix-green-border),
+    transparent
+  );
+  animation: matrixScan 3s infinite;
+  opacity: 0.3;
+}
+
+@keyframes matrixScan {
+  0% {
+    transform: rotate(0deg) translateX(-100%);
+  }
+  100% {
+    transform: rotate(0deg) translateX(100%);
+  }
+}
+
+.matrix-promo p {
+  position: relative;
+  z-index: 2;
+  color: var(--theme-text);
+  margin-bottom: 10px;
+}
+
+.matrix-link {
+  color: var(--matrix-green);
+  text-decoration: none;
+  font-weight: bold;
+  display: inline-block;
+  margin-top: 10px;
+  padding: 8px 15px;
+  border: 1px solid var(--matrix-green);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.matrix-link:hover {
+  color: var(--theme-bg);
+  background-color: var(--matrix-green);
+  text-shadow: none;
+  box-shadow: 0 0 20px var(--matrix-green-border);
+  transform: translateY(-2px);
+}
+
+/* Theme-specific Matrix adjustments */
+body.theme-spooky .matrix-nav-link,
+body.theme-spooky .matrix-link {
+  text-shadow: 0 0 10px var(--matrix-green);
+}
+
+body.theme-win95 .matrix-nav-link {
+  background: var(--matrix-green);
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
+  color: var(--matrix-green);
+  text-shadow: none;
+}
+
+body.theme-win95 .matrix-promo {
+  background: #E0E0E0;
+  border: 2px inset #C0C0C0;
+}
+
+body.theme-win95 .matrix-link {
+  border: 2px outset #C0C0C0;
+  background: #C0C0C0;
+  color: var(--matrix-green);
+  text-shadow: none;
+}
+
+body.theme-win95 .matrix-link:hover {
+  border: 2px inset #C0C0C0;
+  background: #A0A0A0;
+}
+
+/* Auth Forms Styling */
+.auth-forms-container {
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: var(--theme-container-bg, #f9f9f9);
+  border: 1px solid var(--theme-border, #ddd);
+  border-radius: 8px;
+}
+
+.form-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--theme-text);
+}
+
+.form-container div {
+  margin-bottom: 15px;
+}
+
+.form-container label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: var(--theme-text);
+}
+
+.form-container input[type="text"],
+.form-container input[type="email"],
+.form-container input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--theme-border, #ccc);
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: var(--theme-input-bg);
+  color: var(--theme-input-text);
+}
+
+.form-container button[type="submit"] {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--theme-button-bg, #007bff);
+  color: var(--theme-button-text, white);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.form-container button[type="submit"]:hover {
+  opacity: 0.9;
+}
+
+.auth-message {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.auth-message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.auth-message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.auth-switch {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 0.9em;
+}
+
+.auth-switch a {
+  color: var(--theme-link);
+  text-decoration: underline;
+}
+
+/* End Auth Forms Styling */
+
+/* Price Ticker Styling */
+.price-ticker-container {
+  background-color: var(--theme-container-bg, #1f1f1f);
+  color: var(--theme-text, #fff);
+  padding: 5px 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden; /* Crucial for ticker effect */
+  border-bottom: 1px solid var(--theme-border, #333);
+  white-space: nowrap; /* Prevent items from wrapping */
+}
+
+.ticker-wrap {
+  flex-grow: 1;
+  overflow: hidden; /* Hide the overflowing content */
+}
+
+.ticker-move {
+  display: inline-block; /* Allows animation */
+  padding-left: 100%; /* Start with items off-screen to the right */
+  animation: ticker-scroll 60s linear infinite; /* Slowed down from 30s */
+  /* animation-play-state: running; by default */
+}
+
+.ticker-item {
+  display: inline-block;
+  padding: 0 1.5rem; /* Space between items */
+  font-size: 0.85em;
+}
+
+.ticker-item .coin-symbol {
+  font-weight: bold;
+  color: var(--theme-link, #6CB6FF); /* Use link color for emphasis */
+}
+
+.ticker-item .coin-price {
+  margin-left: 5px;
+}
+
+.ticker-item .coin-change {
+  margin-left: 5px;
+  font-size: 0.9em;
+}
+
+.ticker-item .positive {
+  color: #4CAF50; /* Green for positive change */
+}
+
+.ticker-item .negative {
+  color: #F44336; /* Red for negative change */
+}
+
+.ticker-controls {
+  padding: 0 10px;
+  display: flex; /* Align items in controls */
+  align-items: center;
+}
+
+.ticker-controls select {
+  background-color: var(--theme-input-bg, #333);
+  color: var(--theme-input-text, #fff);
+  border: 1px solid var(--theme-border, #555);
+  border-radius: 4px;
+  padding: 3px 5px;
+  font-size: 0.8em;
+  margin-right: 10px; /* Space between dropdown and button */
+}
+
+.ticker-controls button {
+  background: transparent;
+  border: none;
+  color: var(--theme-text, #fff);
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ticker-controls button svg {
+  width: 16px;
+  height: 16px;
+}
+
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%); /* Move items from right to left */
+  }
+}
+
+/* End Price Ticker Styling */
+
+/* Not found message styling */
+.not-found {
+  margin: 40px auto;
+  padding: 25px;
+  background-color: #fff0f0;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 500px;
+}
+
+.error-icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+  color: #e53e3e;
+}
+
+.not-found h2 {
+  color: #e53e3e;
+  margin: 0 0 10px 0;
+  font-size: 24px;
+}
+
+.not-found p {
+  margin: 0;
+  color: #666;
+  font-size: 16px;
+}
+
+/* Preview styling - enhanced for viewing mode */
+body.view-mode #preview {
+  margin-top: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+#preview {
+  margin-top: 30px;
+  padding: 20px;
+  background: #2d2d2d;
+  border-radius: 12px;
+  color: #fff;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+#preview h2 {
+  margin-bottom: 15px;
+  font-size: 20px;
+  color: #fff;
+  border-bottom: 1px solid #444;
+  padding-bottom: 10px;
+}
+
+#highlightedCode {
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 10px;
+  border-radius: 8px;
+  background: #222;
+}
+
+header {
+  background-color: var(--theme-container-bg);
+  padding: 1rem 2rem;
+  border-bottom: 2px solid var(--theme-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  margin: 0;
+  color: var(--theme-text);
+  font-size: 1.8rem;
+}
+
+body.theme-win95 header h1 {
+  color: var(--theme-header-text); /* White text for W95 header */
+}
+
+header nav a {
+  color: var(--theme-link);
+  text-decoration: none;
+  margin-left: 1rem;
+  font-size: 1rem;
+}
+
+body.theme-win95 header nav a {
+  color: var(--theme-header-text); /* White links in W95 header */
+}
+
+header nav a:hover {
+  text-decoration: underline;
+}
+
+main {
+  display: flex;
+  padding: 1rem;
+  gap: 1rem; /* Space between main content and sidebar */
+}
+
+.paste-container {
+  flex: 3; /* Takes up 3/4 of the space */
+  background-color: var(--theme-container-bg);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--theme-border);
+}
+
+body.theme-win95 .paste-container,
+body.theme-win95 .sidebar {
+  border: 2px outset #FFFFFF; /* Classic 3D border */
+  box-shadow: 1px 1px 0px 0px #000000, inset 1px 1px 0px 0px #808080;
+}
+
+.paste-input-area h2,
+.paste-display-area h2 {
+  margin-top: 0;
+  color: var(--theme-text);
+  border-bottom: 1px solid var(--theme-border);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+body.theme-win95 .paste-input-area h2,
+body.theme-win95 .paste-display-area h2,
+body.theme-win95 .sidebar h4 {
+  background-color: var(--theme-header-bg);
+  color: var(--theme-header-text);
+  padding: 3px 5px;
+  margin-top: 0; /* Reset margin for these title bars */
+  margin-left: -2px; /* Adjust to align with border */
+  margin-right: -2px; /* Adjust to align with border */
+  border-bottom: 1px solid #000000;
+  font-size: 0.9rem;
+}
+
+textarea#pasteInput {
+  width: 98%; /* Changed from 100% to account for padding/border better within flex item */
+  min-height: 250px; /* Ensure a decent minimum height */
+  padding: 10px;
+  border: 1px solid var(--theme-border);
+  border-radius: 4px;
+  background-color: var(--theme-input-bg);
+  color: var(--theme-input-text);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
+}
+
+body.theme-win95 textarea#pasteInput,
+body.theme-win95 .paste-options select,
+body.theme-win95 .paste-options input[type="text"],
+body.theme-win95 .paste-options input[type="password"] {
+  border: 1px solid #000000;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #FFFFFF;
+  font-family: 'MS Sans Serif', 'Tahoma', 'Geneva', 'system-ui', 'Arial', sans-serif;
+}
+
+.paste-options {
+  background-color: var(--theme-bg); /* Use main bg for options contrast */
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  border: 1px solid var(--theme-border);
+}
+
+.paste-options h3 {
+  margin-top: 0;
+  color: var(--theme-text);
+  font-size: 1.1rem;
+  margin-bottom: 0.8rem;
+}
+
+.paste-options label {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: var(--theme-sidebar-text); /* Using sidebar-text as it's generally lighter */
+  font-size: 0.9rem;
+}
+
+.paste-options select,
+.paste-options input[type="text"],
+.paste-options input[type="password"] {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 0.8rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 4px;
+  background-color: var(--theme-input-bg);
+  color: var(--theme-input-text);
+  box-sizing: border-box;
+}
+
+.paste-options div {
+  margin-bottom: 0.8rem; /* Add spacing for the checkbox div */
+}
+
+.paste-options .inline-label {
+  display: inline; /* Make label sit next to checkbox */
+  margin-left: 0.3rem;
+  font-weight: normal; /* Override general label boldness if any */
+  color: var(--theme-sidebar-text);
+  font-size: 0.9rem;
+}
+
+.expiration-note,
+.expiration-info-sidebar {
+  font-size: 0.85rem;
+  color: var(--theme-sidebar-text);
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+}
+
+button#createPasteBtn,
+button#copyLinkBtn,
+button#createNewPasteLinkBtn {
+  background-color: var(--theme-button-bg);
+  color: var(--theme-button-text);
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+body.theme-win95 button,
+body.theme-win95 button#createPasteBtn,
+body.theme-win95 button#copyLinkBtn,
+body.theme-win95 button#createNewPasteLinkBtn {
+  border: 1px solid #000000;
+  border-top-color: #FFFFFF;
+  border-left-color: #FFFFFF;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  box-shadow: 1px 1px 0px 0px #000000;
+  background-color: var(--theme-button-bg);
+  color: var(--theme-button-text);
+  padding: 5px 10px; /* W95 buttons are typically smaller */
+  font-size: 0.9rem;
+  border-radius: 0; /* No rounded corners */
+  font-family: 'MS Sans Serif', 'Tahoma', 'Geneva', 'system-ui', 'Arial', sans-serif;
+}
+
+body.theme-win95 button:active,
+body.theme-win95 button#createPasteBtn:active,
+body.theme-win95 button#copyLinkBtn:active,
+body.theme-win95 button#createNewPasteLinkBtn:active {
+  border-top-color: #808080;
+  border-left-color: #808080;
+  border-right-color: #FFFFFF;
+  border-bottom-color: #FFFFFF;
+  box-shadow: none;
+  transform: none; /* No translate for W95 buttons */
+}
+
+button#createPasteBtn:hover,
+button#copyLinkBtn:hover,
+button#createNewPasteLinkBtn:hover {
+  background-color: var(--theme-text); /* Example: Invert for hover - might need adjustment */
+  color: var(--theme-bg);
+}
+
+.paste-display-area pre#pasteOutput {
+  background-color: var(--theme-input-bg);
+  color: var(--theme-input-text);
+  padding: 1rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 4px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  min-height: 150px; /* Give it some base height */
+  max-height: 400px;
+  overflow-y: auto;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+body.theme-win95 .paste-display-area pre#pasteOutput {
+  background-color: var(--theme-input-bg);
+  color: var(--theme-input-text);
+  overflow-y: auto;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+body.theme-win95 .paste-display-area div#pasteOutput {
+  background-color: var(--theme-input-bg);
+  color: var(--theme-input-text);
+  border: 1px solid #000000;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #FFFFFF;
+  font-family: 'MS Sans Serif', 'Tahoma', 'Geneva', 'system-ui', 'Arial', sans-serif; /* Use system font for text display in W95 */
+  padding: 5px;
+}
+
+/* Ensure Markdown code blocks in W95 theme also get W95 styling */
+body.theme-win95 .paste-display-area div#pasteOutput pre {
+  background-color: var(--theme-input-bg) !important; /* Override Prism's default if necessary */
+  color: var(--theme-input-text) !important;
+  border: 1px solid #808080;
+  padding: 5px;
+}
+
+body.theme-win95 .paste-display-area div#pasteOutput pre code {
+  font-family: 'Courier New', Courier, monospace !important; /* Keep code monospaced */
+}
+
+.paste-display-area #shareLink {
+  color: var(--theme-link);
+  word-break: break-all;
+}
+
+.paste-display-area h3 { /* Style for the paste title in display view */
+  color: var(--theme-text);
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.sidebar {
+  flex: 1;
+  background-color: var(--theme-container-bg);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--theme-border);
+  min-height: 300px; /* Give sidebar some min height */
+}
+
+body.theme-win95 .sidebar {
+  border: 2px outset #FFFFFF; /* Classic 3D border */
+  box-shadow: 1px 1px 0px 0px #000000, inset 1px 1px 0px 0px #808080;
+}
+
+.sidebar h4 {
+  color: var(--theme-text);
+  border-bottom: 1px solid var(--theme-border);
+  padding-bottom: 0.5rem;
+  margin-top: 0; /* Remove default margin */
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  margin-bottom: 0.5rem; /* Add some spacing between recent pastes */
+}
+
+.sidebar ul li a {
+  color: var(--theme-link);
+  text-decoration: none;
+}
+
+.sidebar ul li a:hover {
+  text-decoration: underline;
+}
+
+.sidebar p {
+  margin-bottom: 10px;
+  font-size: 0.9em;
+  color: var(--theme-sidebar-text);
+}
+
+footer {
+  text-align: center;
+  padding: 1rem;
+  margin-top: 1rem;
+  background-color: var(--theme-container-bg);
+  border-top: 2px solid var(--theme-border);
+  color: var(--theme-sidebar-text);
+  font-size: 0.9rem;
+}
+
+/* Utility classes */
+.hidden {
+  display: none !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  main {
+    flex-direction: column;
+  }
+
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  header nav {
+    margin-top: 0.5rem;
+    width: 100%; /* Make nav take full width */
+  }
+
+  header nav a {
+    display: block; /* Stack nav links */
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 0.5rem; /* Add space between stacked links */
+    padding: 0.5rem 0; /* Add some padding */
+  }
+
+  .paste-container, .sidebar {
+    width: 100%;
+    box-sizing: border-box; /* Ensure padding doesn't make it overflow */
+  }
+
+  /* Matrix responsive adjustments */
+  .matrix-nav-link {
+    font-size: 0.9rem;
+  }
+
+  .matrix-promo {
+    padding: 10px;
+  }
+
+  .matrix-link {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+}
+
+/* AI News Container Styling */
+#aiNewsContainer {
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid var(--theme-border);
+}
+
+.ai-news-item {
+  margin-bottom: 15px;
+}
+
+.ai-news-item h5 {
+  margin: 0 0 5px 0;
+  font-size: 1em;
+}
+
+.ai-news-item h5 a {
+  color: var(--theme-link);
+  text-decoration: none;
+}
+
+.ai-news-item h5 a:hover {
+  text-decoration: underline;
+}
+
+.ai-news-item p {
+  font-size: 0.85em;
+  margin: 0;
+  color: var(--theme-sidebar-text);
+}
+
+body.theme-win95 .ai-news-item h5 a {
+  color: var(--theme-link);
+}
+
+body.theme-win95 .sidebar ul li a {
+  color: var(--theme-link);
+}
+
+/* Matrix Canvas Styling */
+.paste-input-area {
+  position: relative; /* Needed for absolute positioning of the canvas */
+}
+
+#matrixCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* Behind other direct children of paste-input-area */
+  display: none; /* Initially hidden, JS will show it */
+}
+
+/* Ensure textarea is above the canvas */
+.paste-input-area textarea#pasteInput,
+.paste-input-area .paste-options,
+.paste-input-area h2 /* Add this if h2 should also be above */
+{
+  position: relative;
+  z-index: 1;
+}
+
+/* ASCII Logo Styling */
+#asciiLogo {
+  font-family: 'Courier New', Courier, monospace;
+  color: var(--theme-text); /* Use theme text color */
+  font-size: 7px; /* Adjusted font size */
+  line-height: 1; /* Critical: Set line height to 1 times font-size */
+  white-space: pre;
+  margin: 0 auto; /* Center it */
+  text-align: center; /* Center the text within the pre block */
+  padding: 5px 0; /* Fixed vertical padding */
+  letter-spacing: normal; /* Default letter spacing */
+  display: block; /* Ensure block behavior */
+  overflow-x: auto; /* Add horizontal scroll if wider than container */
+  overflow-y: hidden; /* Typically hide vertical scroll for pre */
+}
+
+body.theme-win95 #asciiLogo {
+  color: var(--theme-header-text); /* Match W95 header text color */
+  font-family: 'Fixedsys', 'Terminal', 'Courier New', Courier, monospace; /* Classic monospaced for W95 */
+}

@@ -1,0 +1,39 @@
+{
+  "id": "b6100cba3efea7d40072850ee6476b40",
+  "files": [
+    {
+      "id": "2d5cac7f9af14b9ef8197e17507f4764",
+      "originalName": "01.png",
+      "size": 2079215,
+      "mimeType": "image/png",
+      "path": "/Users/justicet/Downloads/PasteClone-main/backend/uploads/matrix/2d5cac7f9af14b9ef8197e17507f4764.enc"
+    },
+    {
+      "id": "c89908266d21951e7d3bdf749ac19677",
+      "originalName": "03.png",
+      "size": 1326782,
+      "mimeType": "image/png",
+      "path": "/Users/justicet/Downloads/PasteClone-main/backend/uploads/matrix/c89908266d21951e7d3bdf749ac19677.enc"
+    },
+    {
+      "id": "1c4d40f29f3b07c568c5df80dc35ff28",
+      "originalName": "02.png",
+      "size": 1658326,
+      "mimeType": "image/png",
+      "path": "/Users/justicet/Downloads/PasteClone-main/backend/uploads/matrix/1c4d40f29f3b07c568c5df80dc35ff28.enc"
+    },
+    {
+      "id": "ec919f4dff0bed585c68c2b2dfc3878e",
+      "originalName": "04.png",
+      "size": 185231,
+      "mimeType": "image/png",
+      "path": "/Users/justicet/Downloads/PasteClone-main/backend/uploads/matrix/ec919f4dff0bed585c68c2b2dfc3878e.enc"
+    }
+  ],
+  "createdAt": "2025-06-02T18:35:07.238Z",
+  "expiresAt": "2025-06-02T19:35:07.237Z",
+  "password": null,
+  "downloadCount": 1,
+  "maxDownloads": 100,
+  "userType": "free"
+}
