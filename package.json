@@ -2,6 +2,7 @@
   "name": "pastebin",
   "version": "1.0.0",
   "dependencies": {
+    "@clerk/clerk-js": "^5.68.0",
     "ansi-styles": "^4.3.0",
     "base-x": "^3.0.11",
     "bcrypt": "^5.1.1",

@@ -4,6 +4,28 @@ import DOMPurify from 'dompurify';
 // Import specific languages you want to support with Prism
 // Example: import 'prismjs/components/prism-python';
 import 'prismjs/themes/prism-tomorrow.css'; // Or your preferred theme
+import { Clerk } from '@clerk/clerk-js';
+
+const clerk = new Clerk('pk_test_c2VO...'); // <-- Replace with your actual Clerk Frontend API key
+clerk.load();
+
+// Wait for Clerk to be ready and show/hide UI accordingly
+clerk.addListener('user', (user) => {
+  const clerkAuthContainer = document.getElementById('clerkAuthContainer');
+  const mainAppContainer = document.querySelector('.paste-container');
+  const sidebar = document.querySelector('.sidebar');
+  if (user) {
+    // User is signed in
+    if (clerkAuthContainer) clerkAuthContainer.style.display = 'none';
+    if (mainAppContainer) mainAppContainer.style.display = '';
+    if (sidebar) sidebar.style.display = '';
+  } else {
+    // User is signed out
+    if (clerkAuthContainer) clerkAuthContainer.style.display = '';
+    if (mainAppContainer) mainAppContainer.style.display = 'none';
+    if (sidebar) sidebar.style.display = 'none';
+  }
+});
 
 // DOM Elements
 const pasteInputElement = document.getElementById('pasteInput');
@@ -1094,4 +1116,27 @@ if (upgradeBtn) {
       alert('Could not start checkout.');
     }
   });
+}
+
+// Update DOM element selectors for new header buttons
+const headerUpgradeBtn = document.getElementById('headerUpgradeBtn');
+
+if (headerUpgradeBtn) {
+  headerUpgradeBtn.addEventListener('click', async () => {
+    const res = await fetch('/api/create-checkout-session', { method: 'POST' });
+    const data = await res.json();
+    if (data.url) {
+      window.location = data.url;
+    } else {
+      alert('Could not start checkout.');
+    }
+  });
+}
+
+// Ensure file upload modal matrix is only a background
+if (fileMatrixCanvas) {
+  fileMatrixCanvas.style.zIndex = '0';
+  // Ensure upload-container and its children are above the canvas
+  const uploadContainer = fileUploadModal.querySelector('.upload-container');
+  if (uploadContainer) uploadContainer.style.position = 'relative';
 }
