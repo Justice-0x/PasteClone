@@ -4,10 +4,6 @@ const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 const fileUploadRouter = require('./fileUpload');
 const Stripe = require('stripe');
-const session = require('express-session');
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const GitHubStrategy = require('passport-github2').Strategy;
 const { Pool } = require('pg');
 
 const app = express();
@@ -22,65 +18,9 @@ let pastes = {}; // Using an object to store pastes by ID
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-app.use(session({ secret: 'your_secret', resave: false, saveUninitialized: true }));
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Helper: Find or create user for social login
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-async function findOrCreateSocialUser(provider, providerId, profile) {
-  let user = null;
-  const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
-  // Try to find user by provider/providerId
-  const findQuery = 'SELECT * FROM users WHERE provider = $1 AND provider_id = $2';
-  const findRes = await pool.query(findQuery, [provider, providerId]);
-  if (findRes.rows.length > 0) {
-    user = findRes.rows[0];
-  } else {
-    // Create new user
-    const insertQuery = 'INSERT INTO users (username, email, provider, provider_id, is_pro) VALUES ($1, $2, $3, $4, $5) RETURNING *';
-    const username = profile.username || profile.displayName || (email ? email.split('@')[0] : provider + '_' + providerId);
-    const insertRes = await pool.query(insertQuery, [username, email, provider, providerId, false]);
-    user = insertRes.rows[0];
-  }
-  return user;
-}
-
-passport.serializeUser((user, done) => {
-  done(null, user);
-});
-passport.deserializeUser((obj, done) => {
-  done(null, obj);
-});
-
-passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID || 'GOOGLE_CLIENT_ID',
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'GOOGLE_CLIENT_SECRET',
-  callbackURL: '/auth/google/callback',
-}, async (accessToken, refreshToken, profile, done) => {
-  try {
-    const user = await findOrCreateSocialUser('google', profile.id, profile);
-    return done(null, user);
-  } catch (err) {
-    return done(err);
-  }
-}));
-
-passport.use(new GitHubStrategy({
-  clientID: process.env.GITHUB_CLIENT_ID || 'GITHUB_CLIENT_ID',
-  clientSecret: process.env.GITHUB_CLIENT_SECRET || 'GITHUB_CLIENT_SECRET',
-  callbackURL: '/auth/github/callback',
-}, async (accessToken, refreshToken, profile, done) => {
-  try {
-    const user = await findOrCreateSocialUser('github', profile.id, profile);
-    return done(null, user);
-  } catch (err) {
-    return done(err);
-  }
-}));
 
 // API Endpoints
 
@@ -160,16 +100,6 @@ app.post('/api/create-checkout-session', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
-
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/' }), (req, res) => {
-  res.redirect('/'); // Redirect to your frontend after login
-});
-
-app.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
-app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/' }), (req, res) => {
-  res.redirect('/'); // Redirect to your frontend after login
 });
 
 // Webhook endpoint

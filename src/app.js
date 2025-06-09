@@ -11,18 +11,67 @@ window.Buffer = Buffer;
 const clerk = new Clerk('pk_test_c2VO...'); // <-- Replace with your actual Clerk Frontend API key
 clerk.load();
 
-// Wait for Clerk to be ready and show/hide UI accordingly
+function initializeAppUI() {
+  // Theme selector
+  if (themeSelectorElement) {
+    themeSelectorElement.addEventListener('change', (event) => {
+      applyTheme(event.target.value);
+    });
+  }
+  loadTheme();
+
+  // Matrix effect
+  if (pasteInputAreaElement) {
+    initializeMatrix();
+    startMatrix();
+  }
+
+  // Crypto ticker
+  fetchCryptoPrices(currentTickerType);
+  setInterval(() => fetchCryptoPrices(currentTickerType), 300000);
+
+  // Paste creation and navigation
+  if (createPasteBtnElement) {
+    createPasteBtnElement.addEventListener('click', (e) => {
+      e.preventDefault();
+      // Add your paste creation logic here
+    });
+  }
+  if (navDropNewPasteElement) {
+    navDropNewPasteElement.addEventListener('click', (e) => {
+      e.preventDefault();
+      showPasteInputArea();
+    });
+  }
+  if (openFileUploadBtn) {
+    openFileUploadBtn.addEventListener('click', () => {
+      fileUploadModal.style.display = 'block';
+      startFileMatrix();
+    });
+  }
+  if (headerUpgradeBtn) {
+    headerUpgradeBtn.addEventListener('click', async () => {
+      const res = await fetch('/api/create-checkout-session', { method: 'POST' });
+      const data = await res.json();
+      if (data.url) {
+        window.location = data.url;
+      } else {
+        alert('Could not start checkout.');
+      }
+    });
+  }
+}
+
 clerk.addListener('user', (user) => {
   const clerkAuthContainer = document.getElementById('clerkAuthContainer');
   const mainAppContainer = document.querySelector('.paste-container');
   const sidebar = document.querySelector('.sidebar');
   if (user) {
-    // User is signed in
     if (clerkAuthContainer) clerkAuthContainer.style.display = 'none';
     if (mainAppContainer) mainAppContainer.style.display = '';
     if (sidebar) sidebar.style.display = '';
+    initializeAppUI();
   } else {
-    // User is signed out
     if (clerkAuthContainer) clerkAuthContainer.style.display = '';
     if (mainAppContainer) mainAppContainer.style.display = 'none';
     if (sidebar) sidebar.style.display = 'none';
