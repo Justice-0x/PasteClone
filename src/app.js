@@ -882,3 +882,216 @@ function toggleTickerAnimation() {
     }
     isTickerPaused = !isTickerPaused;
 }
+
+// File Upload Modal Logic
+const fileUploadModal = document.getElementById('fileUploadModal');
+const openFileUploadBtn = document.getElementById('openFileUploadBtn');
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const selectFilesBtn = document.getElementById('selectFilesBtn');
+const fileList = document.getElementById('fileList');
+const uploadBtn = document.getElementById('uploadBtn');
+const expirationTime = document.getElementById('expirationTime');
+const uploadStatus = document.getElementById('uploadStatus');
+const closeModal = document.querySelector('.close');
+
+// Add matrix canvas to file upload modal
+let fileMatrixCanvas = document.getElementById('fileMatrixCanvas');
+if (!fileMatrixCanvas) {
+  fileMatrixCanvas = document.createElement('canvas');
+  fileMatrixCanvas.id = 'fileMatrixCanvas';
+  fileMatrixCanvas.style.position = 'absolute';
+  fileMatrixCanvas.style.top = '0';
+  fileMatrixCanvas.style.left = '0';
+  fileMatrixCanvas.style.width = '100%';
+  fileMatrixCanvas.style.height = '100%';
+  fileMatrixCanvas.style.zIndex = '0';
+  fileUploadModal.querySelector('.modal-content').prepend(fileMatrixCanvas);
+}
+
+let fileMatrixCtx, fileMatrixAnimationId = null, fileMatrixColumns, fileMatrixDrops;
+const fileMatrixFontSize = 14;
+const fileMatrixChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}", fileMatrixColor = '#0F0';
+
+function initializeFileMatrix() {
+  fileMatrixCtx = fileMatrixCanvas.getContext('2d');
+  fileMatrixCanvas.width = fileUploadModal.offsetWidth;
+  fileMatrixCanvas.height = fileUploadModal.offsetHeight;
+  fileMatrixColumns = Math.floor(fileMatrixCanvas.width / fileMatrixFontSize);
+  fileMatrixDrops = [];
+  for (let x = 0; x < fileMatrixColumns; x++) fileMatrixDrops[x] = 1;
+}
+function drawFileMatrix() {
+  if (!fileMatrixCtx || fileUploadModal.style.display === 'none') {
+    if (fileMatrixAnimationId) cancelAnimationFrame(fileMatrixAnimationId);
+    fileMatrixAnimationId = null;
+    return;
+  }
+  fileMatrixCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+  fileMatrixCtx.fillRect(0, 0, fileMatrixCanvas.width, fileMatrixCanvas.height);
+  fileMatrixCtx.fillStyle = fileMatrixColor;
+  fileMatrixCtx.font = fileMatrixFontSize + 'px arial';
+  for (let i = 0; i < fileMatrixDrops.length; i++) {
+    const text = fileMatrixChars.charAt(Math.floor(Math.random() * fileMatrixChars.length));
+    fileMatrixCtx.fillText(text, i * fileMatrixFontSize, fileMatrixDrops[i] * fileMatrixFontSize);
+    if (fileMatrixDrops[i] * fileMatrixFontSize > fileMatrixCanvas.height && Math.random() > 0.975) fileMatrixDrops[i] = 0;
+    fileMatrixDrops[i]++;
+  }
+  fileMatrixAnimationId = requestAnimationFrame(drawFileMatrix);
+}
+function startFileMatrix() {
+  if (!fileMatrixCtx) initializeFileMatrix();
+  fileMatrixCanvas.style.display = 'block';
+  if (!fileMatrixAnimationId) fileMatrixAnimationId = requestAnimationFrame(drawFileMatrix);
+}
+function stopFileMatrix() {
+  if (fileMatrixAnimationId) cancelAnimationFrame(fileMatrixAnimationId);
+  fileMatrixAnimationId = null;
+  fileMatrixCanvas.style.display = 'none';
+}
+
+if (openFileUploadBtn) {
+  openFileUploadBtn.addEventListener('click', () => {
+    fileUploadModal.style.display = 'block';
+    startFileMatrix();
+  });
+}
+if (closeModal) {
+  closeModal.onclick = function() {
+    fileUploadModal.style.display = 'none';
+    resetFileUpload();
+    stopFileMatrix();
+  };
+}
+window.onclick = function(event) {
+  if (event.target == fileUploadModal) {
+    fileUploadModal.style.display = 'none';
+    resetFileUpload();
+    stopFileMatrix();
+  }
+};
+
+let selectedFiles = [];
+function resetFileUpload() {
+  selectedFiles = [];
+  updateFileList();
+  uploadBtn.disabled = true;
+  uploadStatus.innerHTML = '';
+}
+if (selectFilesBtn) {
+  selectFilesBtn.addEventListener('click', () => fileInput.click());
+}
+if (fileInput) {
+  fileInput.addEventListener('change', handleFiles);
+}
+if (dropZone) {
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+  });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    handleFiles({ target: { files: e.dataTransfer.files } });
+  });
+}
+function handleFiles(event) {
+  const files = Array.from(event.target.files);
+  const maxSize = window.isPaidUser ? 10 * 1024 * 1024 * 1024 : 2 * 1024 * 1024 * 1024;
+  const validFiles = files.filter(file => {
+    if (file.size > maxSize) {
+      showUploadStatus(`File ${file.name} exceeds ${window.isPaidUser ? '10GB' : '2GB'} limit`, 'error');
+      return false;
+    }
+    return true;
+  });
+  selectedFiles = [...selectedFiles, ...validFiles];
+  updateFileList();
+  uploadBtn.disabled = selectedFiles.length === 0;
+}
+function updateFileList() {
+  fileList.innerHTML = '';
+  selectedFiles.forEach((file, index) => {
+    const fileItem = document.createElement('div');
+    fileItem.className = 'file-item';
+    fileItem.innerHTML = `
+      <div class="file-info">
+        <div class="file-name">${file.name}</div>
+        <div class="file-size">${formatFileSize(file.size)}</div>
+      </div>
+      <button onclick="removeFile(${index})" class="remove-btn">×</button>
+    `;
+    fileList.appendChild(fileItem);
+  });
+}
+window.removeFile = function(index) {
+  selectedFiles.splice(index, 1);
+  updateFileList();
+  uploadBtn.disabled = selectedFiles.length === 0;
+};
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+function showUploadStatus(message, type = '') {
+  uploadStatus.textContent = message;
+  uploadStatus.className = `upload-status ${type}`;
+}
+if (uploadBtn) {
+  uploadBtn.addEventListener('click', async () => {
+    if (selectedFiles.length === 0) return;
+    const formData = new FormData();
+    // Only allow one file at a time for now
+    formData.append('file', selectedFiles[0]);
+    formData.append('expiration', expirationTime.value);
+    try {
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = 'Uploading...';
+      const response = await fetch('/api/file/upload', {
+        method: 'POST',
+        body: formData
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Upload failed');
+      }
+      const result = await response.json();
+      // Get presigned download link
+      const downloadRes = await fetch(`/api/file/download/${encodeURIComponent(result.key)}`);
+      const downloadData = await downloadRes.json();
+      if (downloadData.url) {
+        showUploadStatus(`File uploaded! <a href="${downloadData.url}" target="_blank">Download Link</a>`, 'success');
+      } else {
+        showUploadStatus('File uploaded, but could not get download link.', 'error');
+      }
+      setTimeout(() => {
+        fileUploadModal.style.display = 'none';
+        resetFileUpload();
+        stopFileMatrix();
+      }, 5000);
+    } catch (error) {
+      console.error('Upload error:', error);
+      showUploadStatus(error.message || 'Failed to upload file', 'error');
+    } finally {
+      uploadBtn.disabled = false;
+      uploadBtn.textContent = 'Upload';
+    }
+  });
+}
+
+const upgradeBtn = document.getElementById('upgradeBtn');
+if (upgradeBtn) {
+  upgradeBtn.addEventListener('click', async () => {
+    const res = await fetch('/api/create-checkout-session', { method: 'POST' });
+    const data = await res.json();
+    if (data.url) {
+      window.location = data.url;
+    } else {
+      alert('Could not start checkout.');
+    }
+  });
+}

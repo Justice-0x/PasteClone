@@ -234,6 +234,35 @@ s0.parentNode.insertBefore(s1,s0);
 </script>
 <!--End of Tawk.to Script-->
 
+<button id="openFileUploadBtn">Share Files</button>
+<div id="fileUploadModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Share Files</h2>
+        <div class="upload-container">
+            <div class="drop-zone" id="dropZone">
+                <p>Drag & Drop files here or</p>
+                <input type="file" id="fileInput" style="display: none;">
+                <button id="selectFilesBtn">Select Files</button>
+            </div>
+            <div id="fileList" class="file-list"></div>
+            <div class="upload-options">
+                <select id="expirationTime">
+                    <option value="1h">1 Hour</option>
+                    <option value="24h">24 Hours</option>
+                    <option value="7d">7 Days</option>
+                </select>
+                <button id="uploadBtn" disabled>Upload</button>
+                <button id="upgradeBtn">Upgrade to Pro (10GB)</button>
+            </div>
+            <div id="uploadStatus" class="upload-status"></div>
+        </div>
+    </div>
+</div>
+
+<a href="/auth/google">Sign in with Google</a>
+<a href="/auth/github">Sign in with GitHub</a>
+
 </body>
 
 </html>
