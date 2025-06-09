@@ -5,6 +5,8 @@ import DOMPurify from 'dompurify';
 // Example: import 'prismjs/components/prism-python';
 import 'prismjs/themes/prism-tomorrow.css'; // Or your preferred theme
 import { Clerk } from '@clerk/clerk-js';
+import { Buffer } from 'buffer';
+window.Buffer = Buffer;
 
 const clerk = new Clerk('pk_test_c2VO...'); // <-- Replace with your actual Clerk Frontend API key
 clerk.load();
