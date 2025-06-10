@@ -8,7 +8,7 @@ import { Clerk } from '@clerk/clerk-js';
 import { Buffer } from 'buffer';
 window.Buffer = Buffer;
 
-const clerk = new Clerk('pk_test_bmVhcmJ5LXN3YW4tNTQuY2xlcmsuYWNjb3VudHMuZGV2JA');
+const clerk = new Clerk('pk_live_Y2xlcmsubXlndXkuZGV2JA
 clerk.load();
 
 function initializeAppUI() {
@@ -668,6 +668,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     fetchCryptoPrices(currentTickerType); // Fetch initial crypto prices based on default type
     setInterval(() => fetchCryptoPrices(currentTickerType), 300000); // Refresh prices for current type
+    initializeAppUI();
 });
 
 // Also update the header link to act like "create new paste"
