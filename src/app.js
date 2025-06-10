@@ -8,7 +8,7 @@ import { Clerk } from '@clerk/clerk-js';
 import { Buffer } from 'buffer';
 window.Buffer = Buffer;
 
-const clerk = new Clerk('pk_live_Y2xlcmsubXlndXkuZGV2JA');
+const clerk = new Clerk('pk_test_bmVhcmJ5LXN3YW4tNTQuY2xlcmsuYWNjb3VudHMuZGV2JA');
 clerk.load();
 
 function initializeAppUI() {
