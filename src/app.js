@@ -34,7 +34,6 @@ function initializeAppUI() {
       applyTheme(event.target.value);
     });
   }
-  loadTheme();
 
   // Matrix effect
   if (pasteInputAreaElement && matrixCanvasElement) {
@@ -654,21 +653,21 @@ window.addEventListener('popstate', (event) => {
 
 // Initial page load
 document.addEventListener('DOMContentLoaded', () => {
-    loadTheme(); // Load theme first
-    handleUrlOrNavigation();
-    fetchAINews(GNEWS_API_KEY);
-    fetchAndDisplayRecentPastes(); // Fetch recent pastes on load
-    setInterval(() => fetchAINews(GNEWS_API_KEY), 3600000); // Refresh every hour
-    // Initialize matrix here for the first load if input area is shown by default
-    if (pasteInputAreaElement && pasteInputAreaElement.style.display !== 'none') {
-      initializeMatrix(); // Initialize once
-      // startMatrix(); // Don't auto-start here, showPasteInputArea will handle it
-    } else {
-      if (matrixCanvasElement) matrixCanvasElement.style.display = 'none';
-    }
-    fetchCryptoPrices(currentTickerType); // Fetch initial crypto prices based on default type
-    setInterval(() => fetchCryptoPrices(currentTickerType), 300000); // Refresh prices for current type
-    initializeAppUI();
+  loadTheme(); // Load theme first
+  initializeAppUI();
+  handleUrlOrNavigation();
+  fetchAINews(GNEWS_API_KEY);
+  fetchAndDisplayRecentPastes(); // Fetch recent pastes on load
+  setInterval(() => fetchAINews(GNEWS_API_KEY), 3600000); // Refresh every hour
+  // Initialize matrix here for the first load if input area is shown by default
+  if (pasteInputAreaElement && pasteInputAreaElement.style.display !== 'none') {
+    initializeMatrix(); // Initialize once
+    // startMatrix(); // Don't auto-start here, showPasteInputArea will handle it
+  } else {
+    if (matrixCanvasElement) matrixCanvasElement.style.display = 'none';
+  }
+  fetchCryptoPrices(currentTickerType); // Fetch initial crypto prices based on default type
+  setInterval(() => fetchCryptoPrices(currentTickerType), 300000); // Refresh prices for current type
 });
 
 // Also update the header link to act like "create new paste"
