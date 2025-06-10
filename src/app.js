@@ -8,7 +8,7 @@ import { Clerk } from '@clerk/clerk-js';
 import { Buffer } from 'buffer';
 window.Buffer = Buffer;
 
-const clerk = new Clerk('pk_test_c2VO...'); // <-- Replace with your actual Clerk Frontend API key
+const clerk = new Clerk('pk_live_Y2xlcmsubXlndXkuZGV2JA'); // <-- Updated to use your actual Clerk Frontend API key
 clerk.load();
 
 function initializeAppUI() {
