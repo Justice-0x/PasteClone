@@ -6,9 +6,9 @@ import DOMPurify from 'dompurify';
 import 'prismjs/themes/prism-tomorrow.css'; // Or your preferred theme
 import { Clerk } from '@clerk/clerk-js';
 import { Buffer } from 'buffer';
-window.Buffer = Buffer;
+window.Buffer = Buffer;DNS1``
 
-const clerk = new Clerk('pk_live_Y2xlcmsubXlndXkuZGV2JA
+const clerk = new Clerk('pk_live_Y2xlcmsubXlndXkuZGV2JA');
 clerk.load();
 
 function initializeAppUI() {
