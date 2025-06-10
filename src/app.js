@@ -12,8 +12,24 @@ const clerk = new Clerk('pk_test_c2VO...'); // <-- Replace with your actual Cler
 clerk.load();
 
 function initializeAppUI() {
+  // Re-select DOM elements to ensure fresh references
+  const themeSelectorElement = document.getElementById('themeSelector');
+  const pasteInputAreaElement = document.querySelector('.paste-input-area');
+  const matrixCanvasElement = document.getElementById('matrixCanvas');
+  const createPasteBtnElement = document.getElementById('createPasteBtn');
+  const navDropNewPasteElement = document.getElementById('navDropNewPaste');
+  const openFileUploadBtn = document.getElementById('openFileUploadBtn');
+  const headerUpgradeBtn = document.getElementById('headerUpgradeBtn');
+  const fileUploadModal = document.getElementById('fileUploadModal');
+  const tickerMoveElement = document.querySelector('.ticker-move');
+  const tickerPlayPauseButton = document.getElementById('tickerPlayPause');
+  const tickerPauseIcon = document.getElementById('tickerPauseIcon');
+  const tickerPlayIcon = document.getElementById('tickerPlayIcon');
+  const tokenTypeSelectorElement = document.getElementById('tokenTypeSelector');
+
   // Theme selector
   if (themeSelectorElement) {
+    themeSelectorElement.onchange = null;
     themeSelectorElement.addEventListener('change', (event) => {
       applyTheme(event.target.value);
     });
@@ -21,35 +37,51 @@ function initializeAppUI() {
   loadTheme();
 
   // Matrix effect
-  if (pasteInputAreaElement) {
+  if (pasteInputAreaElement && matrixCanvasElement) {
     initializeMatrix();
     startMatrix();
   }
 
   // Crypto ticker
-  fetchCryptoPrices(currentTickerType);
-  setInterval(() => fetchCryptoPrices(currentTickerType), 300000);
+  if (tickerMoveElement) {
+    fetchCryptoPrices(currentTickerType);
+    setInterval(() => fetchCryptoPrices(currentTickerType), 300000);
+  }
+  if (tokenTypeSelectorElement) {
+    tokenTypeSelectorElement.onchange = null;
+    tokenTypeSelectorElement.addEventListener('change', (event) => {
+      fetchCryptoPrices(event.target.value);
+    });
+  }
+  if (tickerPlayPauseButton) {
+    tickerPlayPauseButton.onclick = null;
+    tickerPlayPauseButton.addEventListener('click', toggleTickerAnimation);
+  }
 
   // Paste creation and navigation
   if (createPasteBtnElement) {
+    createPasteBtnElement.onclick = null;
     createPasteBtnElement.addEventListener('click', (e) => {
       e.preventDefault();
       // Add your paste creation logic here
     });
   }
   if (navDropNewPasteElement) {
+    navDropNewPasteElement.onclick = null;
     navDropNewPasteElement.addEventListener('click', (e) => {
       e.preventDefault();
       showPasteInputArea();
     });
   }
-  if (openFileUploadBtn) {
+  if (openFileUploadBtn && fileUploadModal) {
+    openFileUploadBtn.onclick = null;
     openFileUploadBtn.addEventListener('click', () => {
       fileUploadModal.style.display = 'block';
       startFileMatrix();
     });
   }
   if (headerUpgradeBtn) {
+    headerUpgradeBtn.onclick = null;
     headerUpgradeBtn.addEventListener('click', async () => {
       const res = await fetch('/api/create-checkout-session', { method: 'POST' });
       const data = await res.json();
@@ -87,10 +119,8 @@ const pasteFolderElement = document.getElementById('pasteFolder');
 const pastePasswordElement = document.getElementById('pastePassword');
 const burnAfterReadElement = document.getElementById('burnAfterRead');
 const pasteTitleElement = document.getElementById('pasteTitle');
-const createPasteBtnElement = document.getElementById('createPasteBtn');
 const pasteCustomAliasElement = document.getElementById('pasteCustomAlias');
 
-const pasteInputAreaElement = document.querySelector('.paste-input-area');
 const pasteDisplayAreaElement = document.querySelector('.paste-display-area');
 
 const displayTitleElement = document.getElementById('displayTitle');
@@ -101,16 +131,12 @@ const copyLinkBtnElement = document.getElementById('copyLinkBtn');
 const createNewPasteLinkBtnElement = document.getElementById('createNewPasteLinkBtn');
 const recentPastesListElement = document.getElementById('recentPastesList');
 const aiNewsContainerElement = document.getElementById('aiNewsContainer');
-const themeSelectorElement = document.getElementById('themeSelector');
-const matrixCanvasElement = document.getElementById('matrixCanvas');
-const downloadPasteBtnElement = document.getElementById('downloadPasteBtn');
 
 // Auth DOM Elements
 const navLoginElement = document.getElementById('navLogin');
 const navRegisterElement = document.getElementById('navRegister');
 const navLogoutElement = document.getElementById('navLogout');
 const userStatusElement = document.getElementById('userStatus');
-const navDropNewPasteElement = document.getElementById('navDropNewPaste'); // Assuming the main paste link needs to be handled
 
 const authFormsContainerElement = document.getElementById('authFormsContainer');
 const registerFormContainerElement = document.getElementById('registerFormContainer');
