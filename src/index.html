@@ -32,7 +32,7 @@
   </div>
 
   <header>
-    <a href="/" style="text-decoration:none;"><pre id="asciiLogo">
+    <pre id="asciiLogo">
 '   __       __             ______                      
 '  /  \     /  |           /      \                     
 '  $$  \   /$$ | __    __ /$$$$$$  | __    __  __    __ 
@@ -45,15 +45,13 @@
 '               /  \__$$ |                    /  \__$$ |
 '               $$    $$/                     $$    $$/ 
 '                $$$$$$/                       $$$$$$/  
-    </pre></a>
+    </pre>
     <nav>
       <a href="#" id="navDropNewPaste">Drop a New Paste</a>
       <a href="#" id="navLogin" style="display: inline;">Login</a>
       <a href="#" id="navRegister" style="display: inline;">Register</a>
       <span id="userStatus" style="display: none; margin-left: 10px;"></span>
       <a href="#" id="navLogout" style="display: none; margin-left: 10px;">Logout</a>
-      <button id="openFileUploadBtn" style="margin-left: 10px;">Share Files</button>
-      <button id="headerUpgradeBtn" style="margin-left: 10px;">Upgrade to Pro</button>
       <select id="themeSelector" aria-label="Select theme">
         <option value="dark">Dark Theme</option>
         <option value="spooky">Spooky Theme</option>
@@ -63,12 +61,47 @@
   </header>
 
   <main>
-    <!-- Clerk Auth Container -->
-    <div id="clerkAuthContainer">
-      <clerk-sign-in></clerk-sign-in>
-      <clerk-sign-up></clerk-sign-up>
+    <div id="authFormsContainer" class="auth-forms-container">
+      <!-- Registration Form -->
+      <div id="registerFormContainer" class="form-container" style="display:none;">
+        <h2>Register New Account</h2>
+        <form id="registerForm">
+          <div>
+            <label for="registerUsername">Username:</label>
+            <input type="text" id="registerUsername" name="username" required>
+          </div>
+          <div>
+            <label for="registerEmail">Email:</label>
+            <input type="email" id="registerEmail" name="email" required>
+          </div>
+          <div>
+            <label for="registerPassword">Password:</label>
+            <input type="password" id="registerPassword" name="password" required minlength="6">
+          </div>
+          <button type="submit">Register</button>
+          <p class="auth-switch">Already have an account? <a href="#" id="switchToLogin">Login here</a></p>
+        </form>
+        <div id="registerMessage" class="auth-message"></div>
+      </div>
+
+      <!-- Login Form -->
+      <div id="loginFormContainer" class="form-container" style="display:none;">
+        <h2>Login to MyGuy Paste</h2>
+        <form id="loginForm">
+          <div>
+            <label for="loginUsername">Username:</label>
+            <input type="text" id="loginUsername" name="username" required>
+          </div>
+          <div>
+            <label for="loginPassword">Password:</label>
+            <input type="password" id="loginPassword" name="password" required>
+          </div>
+          <button type="submit">Login</button>
+          <p class="auth-switch">Don't have an account? <a href="#" id="switchToRegister">Register here</a></p>
+        </form>
+        <div id="loginMessage" class="auth-message"></div>
+      </div>
     </div>
-    <!-- End Clerk Auth Container -->
 
     <div class="paste-container">
       <div class="paste-input-area">
@@ -201,6 +234,7 @@ s0.parentNode.insertBefore(s1,s0);
 </script>
 <!--End of Tawk.to Script-->
 
+<button id="openFileUploadBtn">Share Files</button>
 <div id="fileUploadModal" class="modal" style="display: none;">
     <div class="modal-content">
         <span class="close">&times;</span>
@@ -219,14 +253,11 @@ s0.parentNode.insertBefore(s1,s0);
                     <option value="7d">7 Days</option>
                 </select>
                 <button id="uploadBtn" disabled>Upload</button>
-                <button id="upgradeBtn">Upgrade to Pro (10GB)</button>
             </div>
             <div id="uploadStatus" class="upload-status"></div>
         </div>
     </div>
 </div>
-
-<!-- Clerk Auth Placeholder: Insert Clerk authentication component here in the future -->
 
 </body>
 

@@ -3,8 +3,6 @@ const express = require('express');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 const fileUploadRouter = require('./fileUpload');
-const Stripe = require('stripe');
-const { Pool } = require('pg');
 
 const app = express();
 const PORT = process.env.PORT || 3001; // Backend will run on a different port
@@ -15,12 +13,6 @@ app.use(express.json()); // To parse JSON request bodies
 
 // In-memory store for pastes (NOT FOR PRODUCTION)
 let pastes = {}; // Using an object to store pastes by ID
-
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 // API Endpoints
 
@@ -75,59 +67,6 @@ app.get('/api/pastes/:id', (req, res) => {
 });
 
 app.use('/api/file', fileUploadRouter);
-
-app.post('/api/create-checkout-session', async (req, res) => {
-  try {
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'payment',
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: '10GB File Upload Pro Tier',
-            },
-            unit_amount: 500, // $5.00
-          },
-          quantity: 1,
-        },
-      ],
-      success_url: 'http://localhost:1234/success', // Change to your frontend URL
-      cancel_url: 'http://localhost:1234/cancel',
-    });
-    res.json({ url: session.url });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Webhook endpoint
-app.post('/webhook/stripe', express.raw({type: 'application/json'}), async (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  let event;
-
-  try {
-    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
-  } catch (err) {
-    console.error('Webhook signature verification failed:', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  // Handle the event
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    // You should store the user's email or user ID in the session's metadata when creating the session
-    const email = session.customer_email || (session.metadata && session.metadata.user_email);
-    if (email) {
-      // Mark user as pro in your database
-      await pool.query('UPDATE users SET is_pro = TRUE WHERE email = $1', [email]);
-      console.log(`User with email ${email} upgraded to Pro.`);
-    }
-  }
-
-  res.json({received: true});
-});
 
 console.log('DO_SPACES_ENDPOINT:', process.env.DO_SPACES_ENDPOINT);
 

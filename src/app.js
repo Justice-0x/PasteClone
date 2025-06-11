@@ -4,110 +4,6 @@ import DOMPurify from 'dompurify';
 // Import specific languages you want to support with Prism
 // Example: import 'prismjs/components/prism-python';
 import 'prismjs/themes/prism-tomorrow.css'; // Or your preferred theme
-import { Clerk } from '@clerk/clerk-js';
-import { Buffer } from 'buffer';
-window.Buffer = Buffer;
-
-const clerk = new Clerk('pk_live_Y2xlcmsubXlndXkuZGV2JA');
-clerk.load();
-
-function initializeAppUI() {
-  // Re-select DOM elements to ensure fresh references
-  const themeSelectorElement = document.getElementById('themeSelector');
-  const pasteInputAreaElement = document.querySelector('.paste-input-area');
-  const matrixCanvasElement = document.getElementById('matrixCanvas');
-  const createPasteBtnElement = document.getElementById('createPasteBtn');
-  const navDropNewPasteElement = document.getElementById('navDropNewPaste');
-  const openFileUploadBtn = document.getElementById('openFileUploadBtn');
-  const headerUpgradeBtn = document.getElementById('headerUpgradeBtn');
-  const fileUploadModal = document.getElementById('fileUploadModal');
-  const tickerMoveElement = document.querySelector('.ticker-move');
-  const tickerPlayPauseButton = document.getElementById('tickerPlayPause');
-  const tickerPauseIcon = document.getElementById('tickerPauseIcon');
-  const tickerPlayIcon = document.getElementById('tickerPlayIcon');
-  const tokenTypeSelectorElement = document.getElementById('tokenTypeSelector');
-
-  // Theme selector
-  if (themeSelectorElement) {
-    themeSelectorElement.onchange = null;
-    themeSelectorElement.addEventListener('change', (event) => {
-      applyTheme(event.target.value);
-    });
-  }
-
-  // Matrix effect
-  if (pasteInputAreaElement && matrixCanvasElement) {
-    initializeMatrix();
-    startMatrix();
-  }
-
-  // Crypto ticker
-  if (tickerMoveElement) {
-    fetchCryptoPrices(currentTickerType);
-    setInterval(() => fetchCryptoPrices(currentTickerType), 300000);
-  }
-  if (tokenTypeSelectorElement) {
-    tokenTypeSelectorElement.onchange = null;
-    tokenTypeSelectorElement.addEventListener('change', (event) => {
-      fetchCryptoPrices(event.target.value);
-    });
-  }
-  if (tickerPlayPauseButton) {
-    tickerPlayPauseButton.onclick = null;
-    tickerPlayPauseButton.addEventListener('click', toggleTickerAnimation);
-  }
-
-  // Paste creation and navigation
-  if (createPasteBtnElement) {
-    createPasteBtnElement.onclick = null;
-    createPasteBtnElement.addEventListener('click', (e) => {
-      e.preventDefault();
-      // Add your paste creation logic here
-    });
-  }
-  if (navDropNewPasteElement) {
-    navDropNewPasteElement.onclick = null;
-    navDropNewPasteElement.addEventListener('click', (e) => {
-      e.preventDefault();
-      showPasteInputArea();
-    });
-  }
-  if (openFileUploadBtn && fileUploadModal) {
-    openFileUploadBtn.onclick = null;
-    openFileUploadBtn.addEventListener('click', () => {
-      fileUploadModal.style.display = 'block';
-      startFileMatrix();
-    });
-  }
-  if (headerUpgradeBtn) {
-    headerUpgradeBtn.onclick = null;
-    headerUpgradeBtn.addEventListener('click', async () => {
-      const res = await fetch('/api/create-checkout-session', { method: 'POST' });
-      const data = await res.json();
-      if (data.url) {
-        window.location = data.url;
-      } else {
-        alert('Could not start checkout.');
-      }
-    });
-  }
-}
-
-clerk.addListener('user', (user) => {
-  const clerkAuthContainer = document.getElementById('clerkAuthContainer');
-  const mainAppContainer = document.querySelector('.paste-container');
-  const sidebar = document.querySelector('.sidebar');
-  if (user) {
-    if (clerkAuthContainer) clerkAuthContainer.style.display = 'none';
-    if (mainAppContainer) mainAppContainer.style.display = '';
-    if (sidebar) sidebar.style.display = '';
-    initializeAppUI();
-  } else {
-    if (clerkAuthContainer) clerkAuthContainer.style.display = '';
-    if (mainAppContainer) mainAppContainer.style.display = 'none';
-    if (sidebar) sidebar.style.display = 'none';
-  }
-});
 
 // DOM Elements
 const pasteInputElement = document.getElementById('pasteInput');
@@ -118,8 +14,10 @@ const pasteFolderElement = document.getElementById('pasteFolder');
 const pastePasswordElement = document.getElementById('pastePassword');
 const burnAfterReadElement = document.getElementById('burnAfterRead');
 const pasteTitleElement = document.getElementById('pasteTitle');
+const createPasteBtnElement = document.getElementById('createPasteBtn');
 const pasteCustomAliasElement = document.getElementById('pasteCustomAlias');
 
+const pasteInputAreaElement = document.querySelector('.paste-input-area');
 const pasteDisplayAreaElement = document.querySelector('.paste-display-area');
 
 const displayTitleElement = document.getElementById('displayTitle');
@@ -130,12 +28,16 @@ const copyLinkBtnElement = document.getElementById('copyLinkBtn');
 const createNewPasteLinkBtnElement = document.getElementById('createNewPasteLinkBtn');
 const recentPastesListElement = document.getElementById('recentPastesList');
 const aiNewsContainerElement = document.getElementById('aiNewsContainer');
+const themeSelectorElement = document.getElementById('themeSelector');
+const matrixCanvasElement = document.getElementById('matrixCanvas');
+const downloadPasteBtnElement = document.getElementById('downloadPasteBtn');
 
 // Auth DOM Elements
 const navLoginElement = document.getElementById('navLogin');
 const navRegisterElement = document.getElementById('navRegister');
 const navLogoutElement = document.getElementById('navLogout');
 const userStatusElement = document.getElementById('userStatus');
+const navDropNewPasteElement = document.getElementById('navDropNewPaste'); // Assuming the main paste link needs to be handled
 
 const authFormsContainerElement = document.getElementById('authFormsContainer');
 const registerFormContainerElement = document.getElementById('registerFormContainer');
@@ -653,21 +555,20 @@ window.addEventListener('popstate', (event) => {
 
 // Initial page load
 document.addEventListener('DOMContentLoaded', () => {
-  loadTheme(); // Load theme first
-  initializeAppUI();
-  handleUrlOrNavigation();
-  fetchAINews(GNEWS_API_KEY);
-  fetchAndDisplayRecentPastes(); // Fetch recent pastes on load
-  setInterval(() => fetchAINews(GNEWS_API_KEY), 3600000); // Refresh every hour
-  // Initialize matrix here for the first load if input area is shown by default
-  if (pasteInputAreaElement && pasteInputAreaElement.style.display !== 'none') {
-    initializeMatrix(); // Initialize once
-    // startMatrix(); // Don't auto-start here, showPasteInputArea will handle it
-  } else {
-    if (matrixCanvasElement) matrixCanvasElement.style.display = 'none';
-  }
-  fetchCryptoPrices(currentTickerType); // Fetch initial crypto prices based on default type
-  setInterval(() => fetchCryptoPrices(currentTickerType), 300000); // Refresh prices for current type
+    loadTheme(); // Load theme first
+    handleUrlOrNavigation();
+    fetchAINews(GNEWS_API_KEY);
+    fetchAndDisplayRecentPastes(); // Fetch recent pastes on load
+    setInterval(() => fetchAINews(GNEWS_API_KEY), 3600000); // Refresh every hour
+    // Initialize matrix here for the first load if input area is shown by default
+    if (pasteInputAreaElement && pasteInputAreaElement.style.display !== 'none') {
+      initializeMatrix(); // Initialize once
+      // startMatrix(); // Don't auto-start here, showPasteInputArea will handle it
+    } else {
+      if (matrixCanvasElement) matrixCanvasElement.style.display = 'none';
+    }
+    fetchCryptoPrices(currentTickerType); // Fetch initial crypto prices based on default type
+    setInterval(() => fetchCryptoPrices(currentTickerType), 300000); // Refresh prices for current type
 });
 
 // Also update the header link to act like "create new paste"
@@ -1180,40 +1081,4 @@ if (uploadBtn) {
       uploadBtn.textContent = 'Upload';
     }
   });
-}
-
-const upgradeBtn = document.getElementById('upgradeBtn');
-if (upgradeBtn) {
-  upgradeBtn.addEventListener('click', async () => {
-    const res = await fetch('/api/create-checkout-session', { method: 'POST' });
-    const data = await res.json();
-    if (data.url) {
-      window.location = data.url;
-    } else {
-      alert('Could not start checkout.');
-    }
-  });
-}
-
-// Update DOM element selectors for new header buttons
-const headerUpgradeBtn = document.getElementById('headerUpgradeBtn');
-
-if (headerUpgradeBtn) {
-  headerUpgradeBtn.addEventListener('click', async () => {
-    const res = await fetch('/api/create-checkout-session', { method: 'POST' });
-    const data = await res.json();
-    if (data.url) {
-      window.location = data.url;
-    } else {
-      alert('Could not start checkout.');
-    }
-  });
-}
-
-// Ensure file upload modal matrix is only a background
-if (fileMatrixCanvas) {
-  fileMatrixCanvas.style.zIndex = '0';
-  // Ensure upload-container and its children are above the canvas
-  const uploadContainer = fileUploadModal.querySelector('.upload-container');
-  if (uploadContainer) uploadContainer.style.position = 'relative';
 }

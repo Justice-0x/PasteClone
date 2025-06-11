@@ -76,6 +76,7 @@ web_modules/
 # parcel-specific
 .cache
 dist/
+.parcel-cache/
 
 # Mac files
 .DS_Store

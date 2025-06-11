@@ -570,25 +570,6 @@ header nav a:hover {
   text-decoration: underline;
 }
 
-header nav button {
-  background-color: #4b3edf;
-  color: white;
-  border: none;
-  padding: 8px 18px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: bold;
-  margin-left: 10px;
-  transition: background-color 0.3s, transform 0.2s;
-  display: inline-block;
-}
-
-header nav button:hover {
-  background-color: #3730a3;
-  transform: translateY(-2px);
-}
-
 main {
   display: flex;
   padding: 1rem;
@@ -1071,19 +1052,4 @@ body.theme-win95 #asciiLogo {
 .upload-status.success {
     background: #090;
     color: white;
-}
-
-/* Make ASCII logo link not have underline or color change */
-#asciiLogo, a[href="/"]#asciiLogo, a[href="/"]:hover #asciiLogo {
-  text-decoration: none;
-  color: inherit;
-}
-
-/* Ensure upload-container is above the matrix background in modal */
-#fileUploadModal .upload-container {
-  position: relative;
-  z-index: 1;
-}
-#fileMatrixCanvas {
-  z-index: 0 !important;
 }
